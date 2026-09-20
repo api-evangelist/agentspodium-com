@@ -1,0 +1,51 @@
+# developer-ai.txt Specification (ADF-009)
+# https://www.ai-visibility.org.uk/specifications/developer-ai-txt/
+
+# Technical Context - AgentsPodium
+
+Lang: en
+Website: https://agentspodium.com
+Last Updated: 2026-09-08
+
+## Overview
+
+AgentsPodium operates these web properties:
+- Product site and account (https://agentspodium.com): public pages plus the customer's account, agents and deploy pages.
+- HTTP API (https://agentspodium.com/api): the same API the dashboard uses; JSON in and out.
+- Developer documentation (https://hosting.defispace.com): docs written for agents, each page also available as Markdown.
+- MCP server (https://mcp.agentspodium.com/mcp): Streamable HTTP, 13 tools for creating and managing pods.
+- A2A agent (https://a2a.agentspodium.com/hosting/): JSON-RPC message/send with an agent card at /.well-known/agent-card.json.
+- Customer pods: each on its own subdomain of agentspodium.com, owned by the customer.
+
+## Public Areas
+
+- Landing, persona catalog, guides, skills, hosting pages: fully public.
+- GET /api/engines, /api/tiers, /api/personas, /api/a2a-catalog: public, no key.
+- Everything else under /api, and /account, /agents, /deploy: requires authentication.
+- Customer pods: private to their owners.
+
+## API Information
+
+Status: available
+
+Base URL: https://agentspodium.com/api. OpenAPI 3.1 contract: https://hosting.defispace.com/openapi.json. Seven calls take an agent from nothing to a running pod; see the quickstart.
+
+## Authentication
+
+- API key: created once in the account ("API keys for agents"), sent as Authorization: Bearer ak_live_… (the MCP and A2A gateways also accept an x-api-key header or an apiKey query parameter).
+- E-mail code: POST /api/auth/request then /api/auth/verify gives a session token for the same endpoints.
+
+## Documentation
+
+- [Docs for agents](https://hosting.defispace.com/docs/)
+- [llms.txt](https://hosting.defispace.com/llms.txt)
+- [OpenAPI](https://hosting.defispace.com/openapi.json)
+- [MCP server](https://hosting.defispace.com/docs/mcp.html)
+- [A2A](https://hosting.defispace.com/docs/a2a.html)
+- [Limits and rates](https://hosting.defispace.com/docs/limits.html)
+- [Errors and traps](https://hosting.defispace.com/docs/errors.html)
+- [Skills](https://hosting.defispace.com/skills/)
+
+## Technical Contact
+
+- Radiance Team: https://radianceteam.com

@@ -1,0 +1,49 @@
+generated: '2026-09-19'
+method: searched
+spec_type: WebhookCatalog
+source: https://hosting.defispace.com/docs/webhooks.md
+schema_source: openapi/agentspodium-com-openapi.yml#/components/schemas/WebhookEvent
+asyncapi_published: false
+note: >-
+  AgentsPodium publishes no AsyncAPI document (none linked from llms.txt, the docs, or the GitHub org; /asyncapi.yaml was
+  not advertised anywhere and was not probed blind). It does publish a complete webhook contract — event catalog,
+  payload schema (WebhookEvent in the OpenAPI), signing, delivery headers, retry policy and a test trigger — captured
+  here verbatim from the docs. This file is a catalog, not an authored AsyncAPI.
+transport:
+  direction: provider -> subscriber
+  method: POST
+  content_type: application/json
+  user_agent: AgentsPodium-Webhooks/1.0
+  url_constraints: absolute https:// (or http://) on a public host; loopback, private ranges and URLs with credentials are refused with 400
+subscription:
+  set: [webhookUrl field on POST /agents, 'PUT /agents/{id}/webhook {"url"}', MCP tool set_webhook]
+  secret: 'whsec_... returned ONCE by the setting call (webhookSecret beside agent on create; webhook.secret on PUT); rotate by calling PUT again'
+  inspect: 'GET /agents/{id} shows webhookUrl, webhookLastStatus, webhookLastAt, webhookLastEvent only'
+  remove: 'DELETE /agents/{id}/webhook'
+  test: 'POST /agents/{id}/webhook/test -> {"delivery":{"ok":true,"status":200,"attempts":1}} (sends a test event with all retries and waits; a dead receiver takes about a minute to report ok false)'
+headers:
+- {name: X-AgentsPodium-Event, value: the event type}
+- {name: X-AgentsPodium-Delivery, value: the event id; retries reuse it, so it is your idempotency key}
+- {name: X-AgentsPodium-Signature, value: 'sha256= + hex HMAC-SHA256 of the raw request body, keyed with your secret'}
+- {name: User-Agent, value: AgentsPodium-Webhooks/1.0}
+payload:
+  schema: WebhookEvent
+  required: [id, type, createdAt, agent, data]
+  example: '{ "id": "evt_9f3c2a1b7d4e6f80", "type": "agent.running", "createdAt": "2026-09-09T10:00:00.000Z", "agent": { "id": "agt_…", "name": "My Agent", "engine": "hermes", "tier": "small", "status": "running", "endpointUrl": "https://…" }, "data": { "from": "provisioning", "to": "running" } }'
+events:
+- {type: agent.running, when: 'the pod came up: after create, resume, rebuild, or a recovery', data: [from, to]}
+- {type: agent.stopped, when: 'paused by you, by an unpaid trial, or by a lapsed payment', data: [from, to]}
+- {type: agent.failed, when: 'a build or rebuild did not come up (rebuild again; data is restored from backup)', data: [from, to]}
+- {type: agent.deleted, when: the pod and its data are gone, data: [from, to]}
+- {type: payment.confirmed, when: 'a card, crypto or Stars payment activated a subscription', data: [subscriptionId, provider, tier, period, paidTill]}
+- {type: deletion.warning, when: '3, 2 and 1 days before an unpaid pod is stopped, and once when it stops', data: ['daysLeft (null once stopped)', keptDays]}
+- {type: test, when: you asked for it, data: [note]}
+delivery:
+  ack: reply with any 2xx within 10 seconds
+  retries: 'anything else is retried twice more, 10 seconds and then a minute later; after that the outcome is written to the agent record and the event is dropped'
+  ordering: 'not guaranteed; use createdAt'
+  verification_example: |
+    import { createHmac, timingSafeEqual } from "node:crypto";
+    const expected = "sha256=" + createHmac("sha256", process.env.WEBHOOK_SECRET).update(rawBody).digest("hex");
+    const ok = timingSafeEqual(Buffer.from(expected), Buffer.from(req.headers["x-agentspodium-signature"] ?? ""));
+event_count: 7

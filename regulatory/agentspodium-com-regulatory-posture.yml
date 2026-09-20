@@ -1,0 +1,41 @@
+generated: '2026-09-19'
+method: searched
+probe: true
+source: https://hosting.defispace.com/docs/instances.md
+signals:
+  exit_assistance:
+    url: https://hosting.defispace.com/docs/instances.html#data
+    api: https://agentspodium.com/api/agents/{id}/export
+    evidence:
+    - source: https://hosting.defispace.com/docs/instances.md
+      http_status: 200
+      fetched: '2026-09-19'
+      quote: '"GET /api/agents/:id/export — a tar of the pod''s own data (persona, skills, memory), any time, free."'
+    - source: https://agentspodium.com/faq-ai.txt
+      http_status: 200
+      fetched: '2026-09-19'
+      quote: '"Q: Can I take my agent somewhere else? A: Yes. Its personality file, memory and settings export as plain files, free, whenever you want."'
+    - source: https://hosting.defispace.com/docs/expiry.md
+      http_status: 200
+      fetched: '2026-09-19'
+      quote: '"Before deletesAt everything is exportable (GET /api/agents/:id/export) and a payment reactivates the pod in place."'
+    - source: openapi/agentspodium-com-openapi.yml
+      quote: 'GET /agents/{id}/export declared in the contract (tag Agents).'
+    note: >-
+      A documented, free, self-serve, machine-callable export of the customer's data in plain files, with the window in
+      which it remains available (until deletesAt) stated. This is the substance of an exit/portability commitment and is
+      the only horizontal-regime signal the provider publishes.
+probed_absent:
+- {signal: accessibility_conformance, urls: ['https://agentspodium.com/accessibility'], result: 'SPA shell (no route in the app''s router)'}
+- {signal: subprocessors, urls: ['https://agentspodium.com/legal/subprocessors'], result: SPA shell}
+- {signal: data_subject_request, urls: ['https://agentspodium.com/privacy', 'https://agentspodium.com/legal/privacy', 'https://agentspodium.com/privacy/requests'], result: 'SPA shell — no privacy policy page exists in the router (paths /, /account, /admin*, /agents/:id, /articles, /catalog, /deploy/:personaId, /hosting/:engine, /login, /partners, /personas/*, /roadmap, /skills)'}
+- {signal: incident_notification, urls: ['https://agentspodium.com/legal/dpa'], result: SPA shell}
+- {signal: transparency_report, urls: ['https://agentspodium.com/transparency'], result: SPA shell}
+- {signal: sbom, urls: ['https://agentspodium.com/security/sbom', 'https://github.com/agentspodium/agent-gateway'], result: 'SPA shell; repository publishes no SBOM (search only, never derived)'}
+- {signal: data_residency, urls: ['https://hosting.defispace.com/docs/'], result: 'docs name a single ingress IP (138.199.136.33) and "our own servers" but state no region or residency commitment'}
+- {signal: support_lifetime, urls: ['https://hosting.defispace.com/docs/platforms.md'], result: 'no support period stated for the API or any hosted engine'}
+- {signal: ai_transparency, urls: ['https://agentspodium.com/ai.txt', 'https://agentspodium.com/ai.json'], result: 'these are AI-crawler usage-guidance files (ai-visibility.org.uk ADF), i.e. permissions for AI systems reading the site; they do not disclose the provider''s own use of AI toward its users, so not recorded as ai_transparency'}
+- {signal: age_assurance, urls: ['https://agentspodium.com/faq-ai.txt'], result: 'an eligibility statement ("13 or older, under 18 with a parent or guardian''s OK") without any assurance mechanism; a policy line, not an age-assurance signal'}
+- {signal: global_privacy_control, result: 'no published statement (no privacy policy page found); not tested by header, per rule'}
+- {signal: notice_and_action, urls: ['https://agentspodium.com/legal/report-content'], result: SPA shell}
+- {signal: training_data_summary, result: 'not applicable on the provider''s surface — model inference is the customer''s own key; nothing published'}

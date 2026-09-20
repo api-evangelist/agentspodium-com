@@ -1,0 +1,184 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements for the AgentsPodium account API
+  version: 1.0.0
+  description: Adds a proposed operationId to all 52 operations (the provider declares none), an x-apievangelist provenance block, and reversibility / long-running annotations drawn from the provider docs.
+    Never mutates the harvested spec.
+extends: openapi/agentspodium-com-openapi.yml
+x-generated: '2026-09-19'
+x-method: generated
+actions:
+- target: $.info
+  update:
+    x-apievangelist:
+      profile: https://github.com/api-evangelist/agentspodium-com
+      harvested: '2026-09-19'
+      source: https://hosting.defispace.com/openapi.json
+      note: Operation ids below are proposed by API Evangelist; the provider declares none. Names are also used by mcp/agentspodium-com-tool-crosswalk.yml.
+- target: $.paths['/auth/request'].post
+  update:
+    operationId: requestSignInCode
+- target: $.paths['/auth/verify'].post
+  update:
+    operationId: verifySignInCode
+- target: $.paths['/keys'].get
+  update:
+    operationId: listApiKeys
+- target: $.paths['/keys'].post
+  update:
+    operationId: createApiKey
+- target: $.paths['/keys/{id}'].delete
+  update:
+    operationId: deleteApiKey
+- target: $.paths['/personas'].get
+  update:
+    operationId: listPersonas
+- target: $.paths['/personas/{id}'].get
+  update:
+    operationId: getPersona
+- target: $.paths['/tiers'].get
+  update:
+    operationId: listTiers
+- target: $.paths['/engines'].get
+  update:
+    operationId: listEngines
+- target: $.paths['/tools'].get
+  update:
+    operationId: listTools
+- target: $.paths['/models'].get
+  update:
+    operationId: listModels
+- target: $.paths['/llm-providers'].get
+  update:
+    operationId: listLlmProviders
+- target: $.paths['/status'].get
+  update:
+    operationId: getStatus
+- target: $.paths['/agents'].get
+  update:
+    operationId: listAgents
+- target: $.paths['/agents'].post
+  update:
+    operationId: createAgent
+- target: $.paths['/agents/{id}'].get
+  update:
+    operationId: getAgent
+- target: $.paths['/agents/{id}'].delete
+  update:
+    operationId: deleteAgent
+- target: $.paths['/agents/{id}/upgrade'].post
+  update:
+    operationId: upgradeAgent
+- target: $.paths['/agents/{id}/llm-key'].patch
+  update:
+    operationId: setAgentLlmKey
+- target: $.paths['/agents/{id}/tools'].patch
+  update:
+    operationId: setAgentTools
+- target: $.paths['/agents/{id}/channels'].patch
+  update:
+    operationId: setAgentChannels
+- target: $.paths['/agents/{id}/telegram'].patch
+  update:
+    operationId: setAgentTelegram
+- target: $.paths['/agents/{id}/instructions'].patch
+  update:
+    operationId: setAgentInstructions
+- target: $.paths['/agents/{id}/timezone'].patch
+  update:
+    operationId: setAgentTimezone
+- target: $.paths['/agents/{id}/peers'].put
+  update:
+    operationId: setAgentPeers
+- target: $.paths['/agents/{id}/listing'].patch
+  update:
+    operationId: setAgentListing
+- target: $.paths['/agents/{id}/pause'].post
+  update:
+    operationId: pauseAgent
+- target: $.paths['/agents/{id}/resume'].post
+  update:
+    operationId: resumeAgent
+- target: $.paths['/agents/{id}/rebuild'].post
+  update:
+    operationId: rebuildAgent
+- target: $.paths['/agents/{id}/liveness'].get
+  update:
+    operationId: getAgentLiveness
+- target: $.paths['/agents/{id}/usage'].get
+  update:
+    operationId: getAgentUsage
+- target: $.paths['/agents/{id}/term'].get
+  update:
+    operationId: getAgentTerm
+- target: $.paths['/agents/{id}/export'].get
+  update:
+    operationId: exportAgent
+- target: $.paths['/agents/{id}/backup'].post
+  update:
+    operationId: createAgentBackup
+- target: $.paths['/agents/{id}/backups'].get
+  update:
+    operationId: listAgentBackups
+- target: $.paths['/agents/{id}/memory'].get
+  update:
+    operationId: getAgentMemory
+- target: $.paths['/subscriptions'].get
+  update:
+    operationId: listSubscriptions
+- target: $.paths['/subscriptions/providers'].get
+  update:
+    operationId: listSubscriptionProviders
+- target: $.paths['/agents/{id}/activate'].post
+  update:
+    operationId: activateAgentSubscription
+- target: $.paths['/crypto/info'].get
+  update:
+    operationId: getCryptoInfo
+- target: $.paths['/agents/{id}/crypto-order'].post
+  update:
+    operationId: createAgentCryptoOrder
+- target: $.paths['/agents/{id}/crypto-orders'].get
+  update:
+    operationId: listAgentCryptoOrders
+- target: $.paths['/stars/info'].get
+  update:
+    operationId: getStarsInfo
+- target: $.paths['/agents/{id}/stars-order'].post
+  update:
+    operationId: createAgentStarsOrder
+- target: $.paths['/agents/{id}/stars-orders'].get
+  update:
+    operationId: listAgentStarsOrders
+- target: $.paths['/domains/check'].get
+  update:
+    operationId: checkDomain
+- target: $.paths['/a2a-catalog'].get
+  update:
+    operationId: getA2aCatalog
+- target: $.paths['/agents/{id}/webhook'].put
+  update:
+    operationId: setAgentWebhook
+- target: $.paths['/agents/{id}/webhook'].delete
+  update:
+    operationId: deleteAgentWebhook
+- target: $.paths['/agents/{id}/webhook/test'].post
+  update:
+    operationId: testAgentWebhook
+- target: $.paths['/agents/{id}/app'].patch
+  update:
+    operationId: setAgentApp
+- target: $.paths['/agents/{id}/build'].get
+  update:
+    operationId: getAgentBuild
+- target: $.paths['/agents'].post
+  update:
+    x-long-running: synchronous; 1-2 minutes; client timeout >= 5 minutes (docs/limits.md)
+    x-reversibility: no reversal; delete after a final backup (DELETE /agents/{id})
+- target: $.paths['/agents/{id}'].delete
+  update:
+    x-reversibility: irreversible; export first via GET /agents/{id}/export (docs/instances.md)
+    x-agentic-consequence: destructive
+- target: $.components.schemas.WebhookEvent
+  update:
+    x-signing: X-AgentsPodium-Signature = sha256= + hex HMAC-SHA256(raw body, whsec_ secret); X-AgentsPodium-Delivery is the idempotency key for receivers

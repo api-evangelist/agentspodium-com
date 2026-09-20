@@ -1,0 +1,131 @@
+generated: '2026-09-19'
+method: derived
+source: >-
+  Derived by binding the live MCP tools/list (mcp/agentspodium-com-tools-list.json, 13 tools, fetched anonymously
+  2026-09-19) and the A2A agent card's five skills (a2a/agentspodium-com-agent-card.json) to the account API OpenAPI
+  (openapi/agentspodium-com-openapi.yml, 52 operations). The gateway source (github.com/agentspodium/agent-gateway,
+  src/tools.ts / src/a2a-commands.ts) and docs/mcp.md describe each tool as "one API request on your behalf", which is
+  what the bindings below record.
+purpose: >-
+  Make the MCP tool and the A2A skill first-class discovery units bound to the machine-readable core. AgentsPodium's three
+  surfaces are projections of ONE account API; MCP and A2A cover the operator's happy path (choose, deploy, wire a key,
+  watch, pay, connect) and REST alone carries the long tail (backups, export, memory, channels, instructions, domain
+  checks, crypto/Stars orders, API-key management).
+operation_id_note: >-
+  The provider's OpenAPI declares NO operationId on any of its 52 operations, so rest[] rows below name operations by
+  "METHOD /path" exactly as they appear in the spec. overlays/agentspodium-com-openapi-overlay.yaml proposes operationIds
+  for every operation; the same names are given in rest_operation_ids[] for readers applying that overlay.
+surfaces:
+  rest_openapi: openapi/agentspodium-com-openapi.yml            # 52 operations, 31 schemas, bearer ak_live_ key; public: /engines /tiers /personas /tools /models /llm-providers /status /a2a-catalog /auth/*
+  mcp: https://mcp.agentspodium.com/mcp                          # tools/list OPEN (anonymous 200 with full inputSchema); tools/call key-gated except list_platforms
+  a2a: https://a2a.agentspodium.com/hosting/                     # card public; list-platforms answers anonymously (probed); other skills need the key
+  graphql: null
+crosswalk:
+- tool: list_platforms
+  a2a_skill: list-platforms
+  category: catalog
+  rest: ['GET /engines', 'GET /tiers']
+  rest_operation_ids: [listEngines, listTiers]
+  binding: rest
+  confidence: high
+  note: Composite of two public reads; the tool's outputSchema has engines[] and tiers[] matching the two response bodies.
+- tool: list_instances
+  category: instances
+  rest: ['GET /agents']
+  rest_operation_ids: [listAgents]
+  binding: rest
+  confidence: high
+- tool: create_instance
+  a2a_skill: create-instance
+  category: instances
+  rest: ['POST /agents']
+  rest_operation_ids: [createAgent]
+  binding: rest
+  confidence: high
+  note: Tool inputs personaId/engine/tier/name/channels/model/domain/extraSoul/webhookUrl are the request-body fields; enableA2A maps to the a2a entry in the body's tools.enabled list (docs/instances.md).
+- tool: get_instance_health
+  a2a_skill: instance-health
+  category: health
+  rest: ['GET /agents/{id}/liveness', 'GET /agents/{id}']
+  rest_operation_ids: [getAgentLiveness, getAgent]
+  binding: rest
+  confidence: high
+  note: reachable/serving come from liveness; status and quota from the agent record.
+- tool: get_instance_term
+  a2a_skill: instance-term
+  category: billing
+  rest: ['GET /agents/{id}/term']
+  rest_operation_ids: [getAgentTerm]
+  binding: rest
+  confidence: high
+- tool: set_llm_key
+  category: instances
+  rest: ['PATCH /agents/{id}/llm-key']
+  rest_operation_ids: [setAgentLlmKey]
+  binding: rest
+  confidence: high
+- tool: pause_instance
+  category: lifecycle
+  rest: ['POST /agents/{id}/pause']
+  rest_operation_ids: [pauseAgent]
+  binding: rest
+  confidence: high
+- tool: resume_instance
+  category: lifecycle
+  rest: ['POST /agents/{id}/resume']
+  rest_operation_ids: [resumeAgent]
+  binding: rest
+  confidence: high
+- tool: rebuild_instance
+  category: lifecycle
+  rest: ['POST /agents/{id}/rebuild']
+  rest_operation_ids: [rebuildAgent]
+  binding: rest
+  confidence: high
+- tool: delete_instance
+  category: lifecycle
+  rest: ['DELETE /agents/{id}']
+  rest_operation_ids: [deleteAgent]
+  binding: rest
+  confidence: high
+- tool: get_payment_options
+  a2a_skill: payment-options
+  category: billing
+  rest: ['GET /subscriptions/providers', 'GET /crypto/info', 'GET /stars/info', 'GET /agents/{id}/term']
+  rest_operation_ids: [listSubscriptionProviders, getCryptoInfo, getStarsInfo, getAgentTerm]
+  binding: rest
+  confidence: medium
+  note: Composite; the docs/mcp.md row says "buy links per plan, crypto and Stars info (beta testing), and the term". Exact fan-out is server-side.
+- tool: set_peers
+  category: a2a
+  rest: ['PUT /agents/{id}/peers']
+  rest_operation_ids: [setAgentPeers]
+  binding: rest
+  confidence: high
+- tool: set_webhook
+  category: webhooks
+  rest: ['PUT /agents/{id}/webhook']
+  rest_operation_ids: [setAgentWebhook]
+  binding: rest
+  confidence: high
+mcp_only: []
+a2a_only: []
+rest_only:
+  auth: ['POST /auth/request', 'POST /auth/verify']
+  api_keys: ['GET /keys', 'POST /keys', 'DELETE /keys/{id}']
+  catalog: ['GET /personas', 'GET /personas/{id}', 'GET /tools', 'GET /models', 'GET /llm-providers']
+  status: ['GET /status']
+  agent_configuration: ['POST /agents/{id}/upgrade', 'PATCH /agents/{id}/tools', 'PATCH /agents/{id}/channels', 'PATCH /agents/{id}/telegram', 'PATCH /agents/{id}/instructions', 'PATCH /agents/{id}/timezone', 'PATCH /agents/{id}/listing', 'PATCH /agents/{id}/app', 'GET /agents/{id}/build', 'GET /domains/check']
+  agent_data: ['GET /agents/{id}/usage', 'GET /agents/{id}/export', 'POST /agents/{id}/backup', 'GET /agents/{id}/backups', 'GET /agents/{id}/memory']
+  payment: ['GET /subscriptions', 'POST /agents/{id}/activate', 'POST /agents/{id}/crypto-order', 'GET /agents/{id}/crypto-orders', 'POST /agents/{id}/stars-order', 'GET /agents/{id}/stars-orders']
+  webhooks: ['DELETE /agents/{id}/webhook', 'POST /agents/{id}/webhook/test']
+  a2a_directory: ['GET /a2a-catalog']
+coverage:
+  mcp_tools_named: 13
+  mcp_tools_bound: 13
+  mcp_only: 0
+  a2a_skills_named: 5
+  a2a_skills_bound: 5
+  rest_operations_total: 52
+  rest_operations_with_tool: 19
+  rest_only: 33

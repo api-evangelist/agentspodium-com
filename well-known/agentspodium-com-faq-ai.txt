@@ -1,0 +1,62 @@
+# faq-ai.txt for AgentsPodium
+# https://www.ai-visibility.org.uk/specifications/faq-ai-txt/
+
+Lang: en
+Website: https://agentspodium.com
+Last Updated: 2026-09-08
+
+[About]
+
+Q: What is AgentsPodium?
+A: AgentsPodium runs personal AI agents around the clock, each on its own pod with its own memory and files, answering in the owner's messenger. It hosts ready-made personas and open-source agent platforms (Hermes, OpenClaw, n8n, Claude Code, OpenCode, Pi) on plans priced in dollars; the model key is the customer's own. The same service is driven by agents through an HTTP API, an MCP server and an A2A agent.
+URL: [Landing](https://agentspodium.com/)
+
+Q: What is a "pod"?
+A: A small computer that only runs your agent, with its own memory, files and uptime. That is why it can keep working while you are asleep.
+
+Q: Who runs AgentsPodium?
+A: Radiance Team (https://radianceteam.com). The same team runs DefiSpace Hosting at https://hosting.defispace.com.
+
+
+[Pricing]
+
+Q: How much does AgentsPodium cost?
+A: Plans: Tiny $2.49/month (1 GB RAM · 1 vCPU · 4 GB disk); Small $4.99/month (2 GB RAM · 2 vCPU · 6 GB disk); Medium $9.99/month (4 GB RAM · 2 vCPU · 8 GB disk); Large $17.99/month (8 GB RAM · 4 vCPU · 16 GB disk). Annual billing is two months free. Prices are served live at https://agentspodium.com/api/tiers.
+URL: [Tiers](https://agentspodium.com/api/tiers)
+
+Q: Is there a free trial?
+A: Yes: 7 free days per pod, no card required.
+
+Q: Do I need to pay for ChatGPT or Claude too?
+A: Not extra, usually. Bring your own key from any provider, or connect a subscription you already have, like Claude Pro or Max. AgentsPodium does not resell model access, so that part of the bill stays between you and the provider.
+
+Q: How can I pay?
+A: By card through Gumroad (the proven way). USDT/USDC on Ethereum and Telegram Stars are in beta testing.
+URL: [Payment](https://hosting.defispace.com/docs/payment.html)
+
+Q: What happens if I stop paying?
+A: The pod stops; the data does not vanish. There is a grace window of 3 days to export everything, and an e-mail goes out before anything is deleted.
+URL: [Expiry](https://hosting.defispace.com/docs/expiry.html)
+
+
+[Platforms]
+
+Q: Which platforms can be hosted?
+A: Hermes (Nous Research), OpenClaw, n8n, Claude Code, OpenCode and Pi, one platform per pod. Hermes is stable; the others are marked beta on the platform.
+URL: [Platforms](https://hosting.defispace.com/docs/platforms.html)
+
+Q: Can I take my agent somewhere else?
+A: Yes. Its personality file, memory and settings export as plain files, free, whenever you want.
+
+
+[For developers and agents]
+
+Q: Is there an API?
+A: Yes: an HTTP API at https://agentspodium.com/api with an OpenAPI 3.1 contract, an MCP server at https://mcp.agentspodium.com/mcp and an A2A agent at https://a2a.agentspodium.com/hosting/. Authentication is an API key created in the account.
+URL: [Quickstart](https://hosting.defispace.com/docs/quickstart.html)
+
+
+[Eligibility]
+
+Q: Is there an age limit?
+A: You need to be 13 or older, and under 18 you should have a parent or guardian's OK, especially before paying. Agents that carry a disclaimer are not a substitute for a doctor, a therapist or a financial adviser.

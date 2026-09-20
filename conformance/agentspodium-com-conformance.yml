@@ -1,0 +1,73 @@
+generated: '2026-09-19'
+method: searched
+source: >-
+  Read from the contract and the live surfaces (openapi/agentspodium-com-openapi.yml; MCP initialize/tools/list;
+  a2a/agentspodium-com-agent-card.json; well-known/agentspodium-com-openid-configuration.json;
+  skills/agentspodium-com-agent-skills-index.json) plus the docs. No compliance programme, certification or trust page
+  is published (probe-security-programs found nothing; /security, /trust, /compliance are the SPA shell), so no
+  Compliance pointer is emitted.
+standards:
+- id: openapi-3.1
+  conforms: true
+  evidence: 'openapi/agentspodium-com-openapi.yml declares openapi: 3.1.0; 52 operations, all with summary, description and tags; 31 component schemas; bearer securityScheme applied globally'
+- id: mcp
+  conforms: true
+  version: '2025-06-18'
+  evidence: 'https://mcp.agentspodium.com/mcp initialize returned protocolVersion 2025-06-18, serverInfo agentspodium-hosting 1.0.4, Streamable HTTP; tools/list returned 13 tools with inputSchema/outputSchema/annotations (readOnlyHint, idempotentHint, destructiveHint, openWorldHint)'
+  domain_standard: true
+  note: For an agent-hosting provider MCP and A2A are the market's own machine standards; both are declared IN the contract surface (live tools/list, served card), not on a marketing page.
+- id: a2a
+  conforms: true
+  version: '0.3.0'
+  grade: conformant
+  evidence: 'a2a/agentspodium-com-agent-card.json: protocolVersion 0.3.0, capabilities object, skills array (5), preferredTransport JSONRPC, securitySchemes; POST message/send returned a completed Task with artifacts (probed anonymously on the public skill)'
+  domain_standard: true
+- id: agent-skills-discovery
+  conforms: true
+  version: '0.2.0'
+  evidence: 'https://hosting.defispace.com/.well-known/agent-skills/index.json with $schema https://schemas.agentskills.io/discovery/0.2.0/schema.json; four SKILL.md files with sha256 digests'
+  domain_standard: true
+- id: llms-txt
+  conforms: true
+  evidence: 'https://agentspodium.com/llms.txt and https://hosting.defispace.com/llms.txt (H1, blockquote, H2 link sections); robots.txt comments the llms.txt location'
+- id: oidc
+  conforms: true
+  scope: account identity provider (pod dashboard SSO), NOT the API's own auth
+  evidence: 'https://agentspodium.com/.well-known/openid-configuration -> issuer https://app.agentspodium.com, authorization_code, PKCE S256, RS256 jwks at /oidc/jwks (200), scopes openid profile email'
+- id: oauth2
+  conforms: false
+  evidence: 'The API and MCP server authenticate with an ak_live_ bearer key or a session token; no oauth2 securityScheme in the OpenAPI, no RFC 8414 / RFC 9728 metadata on mcp.agentspodium.com (404)'
+- id: rfc9457-problem-details
+  conforms: false
+  evidence: 'errors are application/json { error, message } (ApiError schema), not application/problem+json'
+- id: rfc8594-sunset
+  conforms: false
+  evidence: no Sunset/Deprecation headers or policy published
+- id: rfc9116-security-txt
+  conforms: false
+  evidence: '/.well-known/security.txt 404 on every host'
+- id: apis-json
+  conforms: false
+  evidence: '/apis.json, /.well-known/apis.json, /apis.yml 404 on every agentspodium.com host; SPA shell on hosting.defispace.com'
+- id: idempotency-key
+  conforms: false
+  evidence: 'no Idempotency-Key parameter in the OpenAPI, none documented (conventions/ idempotency.coverage none)'
+- id: pagination
+  conforms: false
+  evidence: no pagination parameters on any list operation
+- id: webhook-hmac-signing
+  conforms: true
+  evidence: 'X-AgentsPodium-Signature = sha256= + hex HMAC-SHA256 of the raw body, per docs/webhooks.md; WebhookEvent schema in the OpenAPI'
+- id: ai-visibility-adf
+  conforms: true
+  evidence: 'ai.txt (ADF-004), brand.txt (ADF-007), developer-ai.txt (ADF-009), robots-ai.txt (ADF-010), faq-ai.txt, ai.json and identity.json all served with the ai-visibility.org.uk schema references (saved under well-known/)'
+- id: schema-org-organization
+  conforms: true
+  evidence: 'identity.json is a schema.org Organization with parentOrganization Radiance Team and Offer entries; docs pages carry TechArticle JSON-LD'
+- id: openai-compatible-chat
+  conforms: partial
+  evidence: 'docs/integrations.md: the web chat at chat.agentspodium.com talks to pods through an OpenAI-compatible adapter (/v1/chat/completions) "for chat clients that already speak" it; no public endpoint or contract for it is documented'
+compliance_program:
+  published: false
+  certifications: []
+  note: No SOC 2 / ISO 27001 / GDPR page, trust center or DPA is published. Operator is Radiance Team (radianceteam.com).

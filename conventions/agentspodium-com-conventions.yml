@@ -1,0 +1,148 @@
+generated: '2026-09-19'
+method: searched
+source: >-
+  https://hosting.defispace.com/docs/ (quickstart, auth, instances, health, webhooks, expiry, limits, errors, mcp, a2a —
+  each fetched as Markdown 2026-09-19) cross-read with openapi/agentspodium-com-openapi.yml (52 operations) and the live
+  MCP tools/list annotations.
+description: >-
+  How the AgentsPodium account API behaves across every operation: bearer-key auth, no idempotency-key contract, no
+  pagination (lists return everything), synchronous long-running creates, a uniform {error, message} envelope, one
+  documented rate limit, signed webhooks as the alternative to polling, and a documented reversibility model built on
+  pause/resume, backups and a trial/grace window.
+
+base_url: https://agentspodium.com/api
+api_style: REST over HTTPS, JSON in and out
+
+authentication:
+  scheme: 'Authorization: Bearer <token>'
+  token_types:
+  - {kind: API key, prefix: ak_live_, lifetime: does not expire; revocable on the account page, limits: 'cannot create or revoke keys (403)'}
+  - {kind: session token, obtained: 'POST /auth/request (202 always) then POST /auth/verify with the e-mailed six-digit code (valid 10 minutes)', lifetime: 30 days}
+  gateway_alternatives: the MCP and A2A gateways also accept an x-api-key header or an apiKey query parameter
+  public_operations: ['GET /engines', 'GET /tiers', 'GET /personas', 'GET /personas/{id}', 'GET /tools', 'GET /models', 'GET /llm-providers', 'GET /status', 'GET /a2a-catalog', 'POST /auth/request', 'POST /auth/verify']
+  docs: https://hosting.defispace.com/docs/auth.html
+  detail: authentication/agentspodium-com-authentication.yml
+
+idempotency:
+  supported: false
+  coverage: none
+  scope: []
+  mechanism: null
+  note: >-
+    No Idempotency-Key header or equivalent replay-protection contract is documented for any write, and the OpenAPI
+    declares no such parameter. POST /agents (create) is synchronous and unguarded: a retried create makes a second pod
+    (and counts toward the 3-free-pod cap). Several writes are idempotent by nature — PUT /agents/{id}/peers and
+    PUT /agents/{id}/webhook replace state, pause/resume and set_llm_key carry idempotentHint true in the MCP tool
+    annotations — but that is a property of the operation, not a replay mechanism the client can rely on across
+    create/order calls. The one idempotency key the provider publishes is CONSUMER-side: webhook deliveries reuse
+    X-AgentsPodium-Delivery / event id across retries so the receiver can dedupe.
+  docs: https://hosting.defispace.com/docs/webhooks.html
+
+dry_run_mode:
+  supported: false
+  note: No dry-run, validate-only or sandbox mode; the 7-day free trial with no card is the rehearsal path (a real pod, later deleted).
+
+pagination:
+  style: none
+  note: 'GET /agents, /keys, /personas, /subscriptions, /agents/{id}/backups and the order lists return the full collection; no limit/cursor/page parameters exist in the OpenAPI (the only query parameters in the whole spec are domain and https on GET /domains/check).'
+
+field_expansion:
+  supported: false
+
+metadata:
+  supported: false
+  note: 'No free-form metadata field on resources; the closest is extraSoul (up to 4000 chars of owner instructions) and name (60 chars) on an agent.'
+
+request_tracing:
+  request_id_header: null
+  note: No request-id header is documented or observed. Webhook deliveries carry X-AgentsPodium-Delivery (the event id).
+
+long_running_operations:
+  style: synchronous
+  note: >-
+    POST /agents, POST /agents/{id}/rebuild, POST /agents/{id}/upgrade and PATCH .../llm-key are synchronous and take one
+    to two minutes; the docs require a client timeout of at least 5 minutes. After a rebuild the record shows status
+    "provisioning"; poll GET /agents/{id} until "running", then GET /agents/{id}/liveness until serving is true (every
+    5 s; "reachable && !serving" for more than three minutes means rebuild). Webhooks (agent.running) replace polling.
+
+versioning:
+  scheme: none
+  detail: lifecycle/agentspodium-com-lifecycle.yml
+
+error_envelope:
+  media_type: application/json
+  rfc9457: false
+  shape: '{ "error": "<CODE>", "message": "<why>" }'
+  codes: [BAD_REQUEST, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, CONFLICT, RATE_LIMITED, INVALID_CODE, INTERNAL]
+  detail: errors/agentspodium-com-problem-types.yml
+  docs: https://hosting.defispace.com/docs/errors.html
+
+rate_limits:
+  signal_status: 429
+  headers: []
+  documented: 'POST /auth/request: 10 per 10 minutes per IP'
+  detail: rate-limits/agentspodium-com-rate-limits.yml
+
+webhooks:
+  set_via: ['webhookUrl on POST /agents', 'PUT /agents/{id}/webhook', 'MCP set_webhook']
+  signing_header: X-AgentsPodium-Signature
+  verification: 'sha256= + hex HMAC-SHA256 of the raw body, keyed with the whsec_ secret shown once by the call that set it'
+  event_header: X-AgentsPodium-Event
+  delivery_id_header: X-AgentsPodium-Delivery (reused on retries — the receiver's idempotency key)
+  user_agent: AgentsPodium-Webhooks/1.0
+  retries: 'reply 2xx within 10 s; otherwise retried twice more at 10 s and 1 min, then dropped and the outcome written to the agent record'
+  ordering: not guaranteed; use createdAt
+  test: POST /agents/{id}/webhook/test
+  detail: asyncapi/agentspodium-com-webhooks.yml
+  docs: https://hosting.defispace.com/docs/webhooks.html
+
+reversibility:
+  grade: verified
+  grade_basis: >-
+    At least one reversal path AND its window are stated in the provider's own docs: a paused or expired pod can be
+    reactivated in place at any time before deletesAt (trial: stopsAt + 3 days; grace: lapse + 3 days), and rebuild
+    restores from backups kept 7 days. Deletion is documented as irreversible, with export available until it happens.
+  write_surfaces:
+  - operation: 'POST /agents/{id}/pause'
+    reversal: 'POST /agents/{id}/resume'
+    window: unbounded while the pod exists and is paid/in trial
+    docs: https://hosting.defispace.com/docs/instances.html
+  - operation: 'trial or payment lapse -> stopped (automatic)'
+    reversal: 'pay (POST /agents/{id}/activate, crypto or Stars order) or open renewUrl — "a payment reactivates the pod in place"'
+    window: 'before deletesAt: 3 days after stopsAt (trial = created + 7 days; grace = when the subscription lapsed)'
+    docs: https://hosting.defispace.com/docs/expiry.html
+  - operation: 'POST /agents/{id}/rebuild, POST /agents/{id}/upgrade, PATCH /agents/{id}/llm-key (each rebuilds the pod)'
+    reversal: 'data is restored from the last backup; POST /agents/{id}/backup takes one on demand'
+    window: 'backups are daily and kept 7 days'
+    docs: https://hosting.defispace.com/docs/instances.html
+  - operation: 'PATCH /agents/{id}/llm-key'
+    reversal: 'same call with "key": null removes the key'
+    window: unbounded
+    docs: https://hosting.defispace.com/docs/instances.html
+  - operation: 'PUT /agents/{id}/webhook'
+    reversal: 'DELETE /agents/{id}/webhook'
+    window: unbounded
+    docs: https://hosting.defispace.com/docs/webhooks.html
+  - operation: 'PATCH /agents/{id}/listing {"listed": true}'
+    reversal: 'same call with false'
+    window: unbounded
+    docs: https://hosting.defispace.com/docs/a2a.html
+  - operation: 'DELETE /agents/{id}'
+    reversal: none
+    window: none — "gone, after a final backup"; the OpenAPI description says "Export first (GET /agents/{id}/export) if the data might still be needed"
+    docs: https://hosting.defispace.com/docs/instances.html
+  - operation: 'POST /agents/{id}/activate, crypto-order, stars-order (payments)'
+    reversal: no refund, void or cancel operation is documented in the API
+    window: none stated
+    docs: https://hosting.defispace.com/docs/payment.html
+  - operation: 'POST /keys, DELETE /keys/{id}'
+    reversal: 'a revoked key cannot be restored; create another'
+    window: none
+    docs: https://hosting.defispace.com/docs/auth.html
+  export_before_irreversible: 'GET /agents/{id}/export — a tar of the pod''s own data, any time, free (until deletesAt)'
+
+other_conventions:
+- {name: Ids, detail: 'agt_ (agent), usr_ (user), evt_ (webhook event), whsec_ (webhook secret), ak_live_ (API key), ap- (dseq namespace)'}
+- {name: Timestamps, detail: ISO 8601 UTC (createdAt, stopsAt, deletesAt, paidTill)}
+- {name: Secrets shown once, detail: 'webhookSecret and a2aToken are returned by the creating/setting call only; GET /agents/{id} never returns secrets'}
+- {name: Public catalog first, detail: 'ai.txt tells agents not to state prices from memory but to read GET /api/tiers, "which is the price charged"'}

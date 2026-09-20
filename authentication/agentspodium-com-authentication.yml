@@ -1,0 +1,71 @@
+generated: '2026-09-19'
+method: searched
+source: openapi/agentspodium-com-openapi.yml
+docs: https://hosting.defispace.com/docs/auth.html
+docs_markdown: https://hosting.defispace.com/docs/auth.md
+summary:
+  types: [http]
+  schemes: [bearer]
+  api_key_in: [header]
+  oauth2_flows: []
+  credential_kinds: [API key (ak_live_), session token (e-mail code)]
+  public_operations: 11
+  authenticated_operations: 41
+description: >-
+  One bearer scheme with two credential kinds. An API key (ak_live_...) is created by a signed-in person on
+  https://agentspodium.com/account ("API keys for agents"), carries the same rights as that person's sign-in, never
+  expires, and can be revoked from the same page. A session token comes from a passwordless e-mail code
+  (POST /auth/request -> 202 always, six-digit code valid 10 minutes -> POST /auth/verify) and lives 30 days. Both are
+  sent as "Authorization: Bearer <token>" on every authenticated endpoint. Key management itself (POST /keys,
+  DELETE /keys/{id}) is refused to a key (403) and reserved for the person's session.
+schemes:
+- name: bearerAuth
+  type: http
+  scheme: bearer
+  description: An API key `ak_live_…` created on the account page, or a session token from /auth/verify.
+  applied: 'globally (security: [{bearerAuth: []}]); overridden to none on the 11 public operations'
+  sources: [openapi/agentspodium-com-openapi.yml]
+credentials:
+- kind: API key
+  prefix: ak_live_
+  issued_by: a signed-in person at https://agentspodium.com/account ("API keys for agents")
+  lifetime: does not expire
+  revocation: from the account page; a revoked key answers 401 "Invalid or revoked API key" everywhere
+  restrictions: cannot create or revoke keys (POST /keys, DELETE /keys/{id} answer 403)
+  recommended_for: agents
+- kind: session token
+  flow: 'POST /auth/request {"email"} (202 always — never reveals whether the address exists; 10 per 10 minutes per IP) -> six-digit code by e-mail, valid 10 minutes -> POST /auth/verify {"email","code"} -> {"token","user":{"id":"usr_…","email"}}'
+  lifetime: 30 days
+  recommended_for: people, and agents that can read the mailbox (IMAP or a mail API)
+gateway_headers:
+  note: The MCP gateway (mcp.agentspodium.com) and A2A gateway (a2a.agentspodium.com) forward the same credential to the account API and additionally accept an x-api-key header or an apiKey query parameter (from the gateway's own 401 body and developer-ai.txt). The A2A agent card declares the same scheme as securitySchemes.bearerAuth.
+public_operations:
+- GET /engines
+- GET /tiers
+- GET /personas
+- GET /personas/{id}
+- GET /tools
+- GET /models
+- GET /llm-providers
+- GET /status
+- GET /a2a-catalog
+- POST /auth/request
+- POST /auth/verify
+failure_modes:
+- {status: 401, code: UNAUTHORIZED, when: 'no bearer, expired session, revoked key', observed: '{"error":"UNAUTHORIZED","message":"Authentication required"} on GET /api/agents without a token (2026-09-19)'}
+- {status: 403, code: FORBIDDEN, when: 'a key managing keys; someone else''s agent'}
+- {status: 429, when: '/auth/request rate limit exceeded'}
+oidc_note: >-
+  https://agentspodium.com/.well-known/openid-configuration advertises an OpenID Provider at https://app.agentspodium.com
+  (authorization_code + PKCE, RS256, scopes openid profile email). This is the account identity provider that signs pod
+  owners into their engine dashboards (the "sso" capability on GET /api/engines), not an OAuth flow for the account API,
+  MCP server or A2A agent — none of which publishes OAuth metadata or accepts anything but the bearer key/session token.
+  Saved at well-known/agentspodium-com-openid-configuration.json.
+scopes: none — the key inherits the full rights of the person who created it; there is no scoped or read-only key
+x-evidence:
+  fetched: '2026-09-19'
+  probes:
+  - {url: 'https://hosting.defispace.com/docs/auth.md', http_status: 200}
+  - {url: 'https://agentspodium.com/api/agents', http_status: 401, note: unauthenticated}
+  - {url: 'https://agentspodium.com/api/tiers', http_status: 200, note: public}
+  - {url: 'https://mcp.agentspodium.com/mcp', method: POST, body: 'tools/call list_instances (no key)', http_status: 200, note: 'UNAUTHORIZED body naming Authorization Bearer, x-api-key and apiKey'}

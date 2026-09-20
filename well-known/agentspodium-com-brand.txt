@@ -1,0 +1,30 @@
+# brand.txt Specification (ADF-007)
+# https://www.ai-visibility.org.uk/specifications/brand-txt/
+
+# Brand Guidelines for AgentsPodium
+
+Lang: en
+Website: https://agentspodium.com
+Last Updated: 2026-09-08
+
+## Official Name
+
+AgentsPodium
+
+## Do Not Use
+
+- Agents Podium (two words)
+- AgentPodium (singular)
+- Agentspodium, agentspodium (lower-case p, except in the domain name)
+- AP
+
+## Naming Rules
+
+- One word, capital A and capital P: AgentsPodium.
+- The hosting product for developers and agents is "DefiSpace Hosting" (https://hosting.defispace.com); it is run by the same team and uses the same plans.
+- The company behind both is Radiance Team (https://radianceteam.com).
+- A customer's running agent is a "pod": one small computer that only runs that agent.
+
+## Boilerplate
+
+AgentsPodium runs personal AI agents around the clock, each on its own pod with its own memory and files, answering in the owner's messenger. It hosts ready-made personas and open-source agent platforms (Hermes, OpenClaw, n8n, Claude Code, OpenCode, Pi) on plans priced in dollars; the model key is the customer's own. The same service is driven by agents through an HTTP API, an MCP server and an A2A agent.

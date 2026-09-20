@@ -1,0 +1,143 @@
+generated: '2026-09-19'
+method: probed
+source: https://a2a.agentspodium.com/hosting/.well-known/agent-card.json
+card:
+  file: a2a/agentspodium-com-agent-card.json
+discovery:
+  path: /.well-known/agent-card.json
+  canonical: true
+  host: a2a.agentspodium.com
+  note: >-
+    The canonical path on the primary domain is a redirect, not a miss: https://agentspodium.com/.well-known/agent-card.json,
+    https://www.agentspodium.com/... and https://app.agentspodium.com/... each answer 302 Location
+    https://a2a.agentspodium.com/hosting/.well-known/agent-card.json, and https://mcp.agentspodium.com/.well-known/agent-card.json
+    serves the same 3,216-byte body directly (200). The card therefore lives at a path prefix (/hosting/) on the dedicated A2A
+    host, which is the provider's own choice of layout; the primary domain points at it. The legacy /.well-known/agent.json
+    is a real JSON 404 ({"error":"NOT_FOUND"}, 21 bytes) on every agentspodium.com host, and a negative-control path
+    (/.well-known/agentspodium-com-negative-control-7f3ab91c.json) 404s on all of them, so the 200 is a served document and
+    not a catch-all. Ownership is not in question: provider.organization is "AgentsPodium", securitySchemes describe the
+    ak_live_ key issued at https://agentspodium.com/account, and the provider's own llms.txt, ai.txt, faq-ai.txt and
+    developer-ai.txt on agentspodium.com all name this exact card URL. provider.url and documentationUrl point at
+    hosting.defispace.com, which AgentsPodium's brand.txt identifies as "DefiSpace Hosting ... run by the same team" and
+    its llms.txt names as the developer docs host.
+x-evidence:
+  fetched: '2026-09-19'
+  url: https://a2a.agentspodium.com/hosting/.well-known/agent-card.json
+  http_status: 200
+  content_type: application/json; charset=utf-8
+  body_bytes: 3216
+  body_parses_as: JSON object with AgentCard shape (protocolVersion, name, description, url, preferredTransport, version, provider, documentationUrl, iconUrl, capabilities, defaultInputModes, defaultOutputModes, securitySchemes, security, skills)
+  corroborating_probes:
+  - url: https://agentspodium.com/.well-known/agent-card.json
+    http_status: 302
+    note: Location https://a2a.agentspodium.com/hosting/.well-known/agent-card.json (same for www. and app.).
+  - url: https://mcp.agentspodium.com/.well-known/agent-card.json
+    http_status: 200
+    note: Same 3,216-byte card served from the MCP host; the gateway serves both hostnames from one process (github.com/agentspodium/agent-gateway README).
+  - url: https://agentspodium.com/.well-known/agent.json
+    http_status: 404
+  - url: https://a2a.agentspodium.com/hosting/.well-known/agent.json
+    http_status: 404
+  - url: https://a2a.agentspodium.com/.well-known/agent-card.json
+    http_status: 200
+    note: >-
+      A second, smaller card (509 bytes) for the host root: "AgentsPodium A2A Directory", the single-host directory and
+      router that lists opted-in customer pods at /catalog.json and routes /agent/<slug>/ to each. Saved verbatim to
+      a2a/agentspodium-com-directory-agent-card.json. It has no protocolVersion and no skills[] so it is not graded here;
+      the hosting card above is the provider's service agent.
+  - url: https://a2a.agentspodium.com/catalog.json
+    http_status: 200
+    note: '{"services":[{"slug":"hosting",...}],"agents":[]} — one service (this card) and, at fetch time, zero opted-in customer pods.'
+  - url: https://agentspodium.com/api/a2a-catalog
+    http_status: 200
+    note: The account API's public A2A directory operation (GET /a2a-catalog in the OpenAPI) returns the same document.
+  - url: https://a2a.agentspodium.com/hosting/
+    method: POST
+    body: '{"jsonrpc":"2.0","id":1,"method":"message/send","params":{"message":{"role":"user","messageId":"m1","parts":[{"kind":"text","text":"platforms"}]}}}'
+    http_status: 200
+    response: 'JSON-RPC result: kind "task", status.state "completed", one artifact with a data part carrying engines[] and tiers[] (the public list-platforms skill).'
+    note: A real A2A JSON-RPC responder. list-platforms is documented as the one skill that answers without a key; nothing account-scoped was called and no key was used.
+  - url: https://a2aregistry.org
+    note: This provider entered the harvest backlog from the a2a-registry listing (x-source harvest:a2a-registry). The registry was the lead; the card was fetched from the provider's own host.
+agent_card:
+  name: AgentsPodium Hosting
+  description: >-
+    Create, monitor and manage AgentsPodium-hosted AI agent instances: pick a platform (Hermes, OpenClaw, n8n, Claude Code,
+    OpenCode, Pi) and a plan, get a running pod with its own URL. Backed by the same account API as the AgentsPodium
+    dashboard. Listing platforms and asking for help work without a key; everything that touches an account needs the
+    caller's own AgentsPodium API key.
+  url: https://a2a.agentspodium.com/hosting/
+  version: 0.2.0
+  protocol_version: 0.3.0
+  preferred_transport: JSONRPC
+  provider:
+    organization: AgentsPodium
+    url: https://hosting.defispace.com/
+  documentation_url: https://hosting.defispace.com/docs/a2a.html
+  icon_url: https://hosting.defispace.com/icon-512.png
+  capabilities:
+    streaming: false
+    push_notifications: false
+    state_transition_history: false
+  default_input_modes: [text/plain, application/json]
+  default_output_modes: [application/json, text/plain]
+  security_schemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: An AgentsPodium API key (ak_live_...) from https://agentspodium.com/account, "API keys for agents".
+  security:
+  - bearerAuth: []
+  skill_count: 5
+  skills:
+  - {id: create-instance, name: Create instance, tags: [hosting, deploy, instance], auth: api key}
+  - {id: instance-health, name: Instance health, tags: [hosting, status, health], auth: api key}
+  - {id: instance-term, name: Instance term, tags: [hosting, billing], auth: api key}
+  - {id: list-platforms, name: List platforms, tags: [hosting, catalog], auth: none (public)}
+  - {id: payment-options, name: Payment options, tags: [hosting, billing, payment], auth: api key}
+  skill_invocation: >-
+    Each skill carries two examples: a DataPart {"skill":"<id>","params":{...}} and a plain-text command form
+    ("create hermes small My Agent", "health agt_123", "term agt_123", "platforms", "payment agt_123"). The reply is a
+    completed Task whose artifact carries a data part with the result and a text part with a one-line summary
+    (docs/a2a.md). Account-scoped skills without a key return JSON-RPC error -32001.
+conformance:
+  spec: A2A 1.0.0
+  grade: conformant
+  protocol_version: '0.3.0'
+  preferred_transport: JSONRPC
+  hard_checks:
+    capabilities_is_object: true
+    protocol_version_present: true
+    skills_is_array: true
+  optional_fields:
+    default_input_modes: true
+    default_output_modes: true
+    preferred_transport: true
+  grade_basis: >-
+    capabilities is an OBJECT (streaming, pushNotifications, stateTransitionHistory — all false); protocolVersion is present
+    ("0.3.0"); skills is an ARRAY of five fully-populated skills, each with id, name, description, tags, examples,
+    inputModes and outputModes. All three optional discriminators (preferredTransport, defaultInputModes,
+    defaultOutputModes) are present. securitySchemes/security are declared and match what the endpoint actually enforces
+    (probed: the public skill answers anonymously, the docs state account skills return -32001 without a key). A
+    0.3.0-shaped card (top-level url + preferredTransport + protocolVersion), internally consistent with the revision it declares.
+  deviations:
+  - field: protocolVersion / url / preferredTransport
+    observed: 0.3.0 top-level triple; no supportedInterfaces[] or additionalInterfaces[]
+    note: Valid for A2A 0.3.0 as declared. Recorded because both card shapes coexist in the catalog, not as a fault.
+  - field: capabilities.streaming / pushNotifications
+    observed: false / false
+    note: create-instance is documented as synchronous and one to two minutes long (docs/limits.md); without streaming or push the caller must hold the request open. Consistent with the docs, which say to use a client timeout of at least 5 minutes.
+  - field: provider.url / documentationUrl / iconUrl
+    observed: hosting.defispace.com rather than agentspodium.com
+    note: A second brand of the same operator (brand.txt "DefiSpace Hosting ... run by the same team"). Not a fault, but a reader matching provider.url to the serving domain would not get a match.
+  - field: signatures
+    observed: absent
+    note: No JWS signature block; authenticity rests on TLS to a2a.agentspodium.com.
+surface_relationship:
+  note: >-
+    Three agent surfaces, all projections of the one account API at https://agentspodium.com/api (52 operations, OpenAPI
+    3.1 at openapi/). A2A: five skills at https://a2a.agentspodium.com/hosting/. MCP: thirteen tools at
+    https://mcp.agentspodium.com/mcp plus one prompt and one resource (mcp/agentspodium-com-mcp.yml). Both gateways are
+    one open-source process (github.com/agentspodium/agent-gateway) that forwards the caller's key to the account API
+    and holds no state. The crosswalk in mcp/agentspodium-com-tool-crosswalk.yml binds every skill and tool to its
+    backing operation.

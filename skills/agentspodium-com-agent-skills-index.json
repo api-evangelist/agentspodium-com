@@ -1,0 +1,33 @@
+{
+  "$schema": "https://schemas.agentskills.io/discovery/0.2.0/schema.json",
+  "skills": [
+    {
+      "name": "build-report",
+      "type": "skill-md",
+      "description": "Turn aggregated findings — news, monitoring, research — into a report someone will actually read: a chat digest, a Markdown doc, or a self-contained HTML dashboard. Use when a task ends with a pile of",
+      "url": "https://hosting.defispace.com/skills/build-report/SKILL.md",
+      "digest": "sha256:548c968c47e6e158aa21805766b83b14a05bbe63c5c9738f2825367ef04eb908"
+    },
+    {
+      "name": "connect-agents",
+      "type": "skill-md",
+      "description": "Connect your agent to another agent over A2A so they can ask each other for things. Use when a task needs something only the other agent can do, or when you are told to 'link' two agents and the setup",
+      "url": "https://hosting.defispace.com/skills/connect-agents/SKILL.md",
+      "digest": "sha256:c0a74763361e6ee9d19308a5a6e453105911e7663c800cdfa4ea98ef98cccb44"
+    },
+    {
+      "name": "deploy-agent",
+      "type": "skill-md",
+      "description": "Deploy a new AI agent on AgentsPodium and pay for it in crypto, over HTTP, without a browser. Use when you need to give a task its own always-on agent, or when you are asked to 'spin up another agent'",
+      "url": "https://hosting.defispace.com/skills/deploy-agent/SKILL.md",
+      "digest": "sha256:b1ad24cdd0a33f6c11c54797c15724a05c0f5e5713c066327375c7d1593be310"
+    },
+    {
+      "name": "deploy-app",
+      "type": "skill-md",
+      "description": "Deploy a project from a git repository onto AgentsPodium: frontend and backend on one pod, behind one domain, with a persistent disk. Use when you are asked to ship an app somewhere, or to move a site",
+      "url": "https://hosting.defispace.com/skills/deploy-app/SKILL.md",
+      "digest": "sha256:44ffa139ae953c6bf8da5dd78a18061372bb9d9ff1da29051bad5e8cbf09248b"
+    }
+  ]
+}

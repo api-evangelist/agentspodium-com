@@ -1,0 +1,148 @@
+generated: '2026-09-19'
+method: searched
+description: >-
+  Results of probing the closed /.well-known/ path list on every host the record knows: the registrable domain and www,
+  the app host the OIDC discovery document names as issuer, the MCP host, the A2A host, and the docs host
+  hosting.defispace.com (a second brand of the same operator, where the OpenAPI and llms.txt live). Status is the HTTP
+  code observed 2026-09-19. Only documents that returned a real, correctly-typed payload were saved (file: set).
+  agentspodium.com hosts answer every miss with a 21-byte JSON 404 and a negative-control path 404s, so their 200s are
+  served documents. hosting.defispace.com is an SPA catch-all: every /.well-known/* path, /apis.json, /apis.yml AND the
+  negative-control path return the same 18,908-byte text/html shell, so no well-known document is credited to it; its
+  /llms.txt and /openapi.json are real (correct content type, parse) and are recorded for completeness.
+hit_summary:
+  real_documents: 3
+  hosts_with_real_document: [agentspodium.com, www.agentspodium.com, app.agentspodium.com]
+  document_types: [openid-configuration (RFC 8414/OIDC Discovery, issuer https://app.agentspodium.com), agent-card.json (A2A, see a2a/)]
+  security_txt: absent on every host
+  apis_json: absent on every host
+  oauth_protected_resource: absent on the MCP host and every other host
+hosts:
+- host: https://agentspodium.com
+  path_echo_control: passed
+  negative_control: {path: /.well-known/agentspodium-com-negative-control-7f3ab91c.json, status: 404, bytes: 21}
+  documents:
+  - {path: /.well-known/security.txt, status: 404}
+  - {path: /.well-known/openid-configuration, status: 200, type: application/json, file: agentspodium-com-openid-configuration.json, note: 'issuer https://app.agentspodium.com; authorization_code + PKCE S256; scopes openid profile email; RS256; jwks_uri https://app.agentspodium.com/oidc/jwks (200, saved as agentspodium-com-app-jwks.json)'}
+  - {path: /.well-known/oauth-authorization-server, status: 404}
+  - {path: /.well-known/oauth-protected-resource, status: 404}
+  - {path: /.well-known/api-catalog, status: 404}
+  - {path: /.well-known/api-catalog.json, status: 404}
+  - {path: /.well-known/ai-plugin.json, status: 404}
+  - {path: /.well-known/ucp.json, status: 404}
+  - {path: /.well-known/acp.json, status: 404}
+  - {path: /.well-known/aauth-resource.json, status: 404}
+  - {path: /.well-known/apis.json, status: 404}
+  - {path: /apis.json, status: 404}
+  - {path: /apis.yml, status: 404}
+  - {path: /.well-known/agent-card.json, status: 302, note: 'Location https://a2a.agentspodium.com/hosting/.well-known/agent-card.json — followed and saved under a2a/'}
+  - {path: /.well-known/agent.json, status: 404}
+  - {path: /llms.txt, status: 200, type: text/plain, file: ../llms/agentspodium-com-llms.txt}
+  - {path: /ai.txt, status: 200, type: text/plain, file: agentspodium-com-ai.txt, note: 'AI-visibility ADF-004 usage guidance; not a /.well-known/ path, recorded because the provider publishes it and robots.txt/robots-ai.txt point at it'}
+  - {path: /ai.json, status: 200, type: application/json, file: agentspodium-com-ai.json}
+  - {path: /identity.json, status: 200, type: application/json, file: agentspodium-com-identity.json, note: 'schema.org Organization; parentOrganization Radiance Team; sameAs hosting.defispace.com, github.com/agentspodium; four Offer entries matching /api/tiers'}
+  - {path: /brand.txt, status: 200, type: text/plain, file: agentspodium-com-brand.txt}
+  - {path: /faq-ai.txt, status: 200, type: text/plain, file: agentspodium-com-faq-ai.txt}
+  - {path: /developer-ai.txt, status: 200, type: text/plain, file: agentspodium-com-developer-ai.txt}
+  - {path: /robots-ai.txt, status: 200, type: text/plain, file: agentspodium-com-robots-ai.txt}
+- host: https://www.agentspodium.com
+  path_echo_control: passed
+  negative_control: {path: /.well-known/agentspodium-com-negative-control-7f3ab91c.json, status: 404, bytes: 21}
+  documents:
+  - {path: /.well-known/security.txt, status: 404}
+  - {path: /.well-known/openid-configuration, status: 200, type: application/json, file: agentspodium-com-openid-configuration.json, note: identical body to the apex host}
+  - {path: /.well-known/oauth-authorization-server, status: 404}
+  - {path: /.well-known/oauth-protected-resource, status: 404}
+  - {path: /.well-known/api-catalog, status: 404}
+  - {path: /.well-known/api-catalog.json, status: 404}
+  - {path: /.well-known/ai-plugin.json, status: 404}
+  - {path: /.well-known/ucp.json, status: 404}
+  - {path: /.well-known/acp.json, status: 404}
+  - {path: /.well-known/aauth-resource.json, status: 404}
+  - {path: /.well-known/apis.json, status: 404}
+  - {path: /apis.json, status: 404}
+  - {path: /apis.yml, status: 404}
+  - {path: /.well-known/agent-card.json, status: 302, note: Location https://a2a.agentspodium.com/hosting/.well-known/agent-card.json}
+  - {path: /.well-known/agent.json, status: 404}
+  - {path: /llms.txt, status: 200, type: text/plain}
+- host: https://app.agentspodium.com
+  role: OIDC issuer named by the discovery document; also serves the product SPA
+  path_echo_control: passed
+  negative_control: {path: /.well-known/agentspodium-com-negative-control-7f3ab91c.json, status: 404, bytes: 21}
+  documents:
+  - {path: /.well-known/openid-configuration, status: 200, type: application/json, file: agentspodium-com-app-openid-configuration.json}
+  - {path: /oidc/jwks, status: 200, type: application/json, file: agentspodium-com-app-jwks.json, note: 'one RSA sig key, alg RS256'}
+  - {path: /.well-known/oauth-authorization-server, status: 404}
+  - {path: /.well-known/oauth-protected-resource, status: 404}
+  - {path: /.well-known/security.txt, status: 404}
+  - {path: /.well-known/agent-card.json, status: 302, note: Location https://a2a.agentspodium.com/hosting/.well-known/agent-card.json}
+- host: https://mcp.agentspodium.com
+  role: MCP server host (RFC 9728 would place protected-resource metadata here)
+  path_echo_control: passed
+  negative_control: {path: /.well-known/agentspodium-com-negative-control-7f3ab91c.json, status: 404, bytes: 131}
+  documents:
+  - {path: /.well-known/security.txt, status: 404}
+  - {path: /.well-known/openid-configuration, status: 404}
+  - {path: /.well-known/oauth-authorization-server, status: 404}
+  - {path: /.well-known/oauth-protected-resource, status: 404}
+  - {path: /.well-known/oauth-protected-resource/mcp, status: 404}
+  - {path: /.well-known/api-catalog, status: 404}
+  - {path: /.well-known/api-catalog.json, status: 404}
+  - {path: /.well-known/ai-plugin.json, status: 404}
+  - {path: /.well-known/ucp.json, status: 404}
+  - {path: /.well-known/acp.json, status: 404}
+  - {path: /.well-known/aauth-resource.json, status: 404}
+  - {path: /.well-known/apis.json, status: 404}
+  - {path: /apis.json, status: 404}
+  - {path: /apis.yml, status: 404}
+  - {path: /.well-known/agent-card.json, status: 200, type: application/json, note: 'same 3,216-byte hosting card as a2a.agentspodium.com/hosting/ — saved once under a2a/'}
+  - {path: /.well-known/agent.json, status: 404}
+  - {path: /llms.txt, status: 404}
+  - {path: /openapi.json, status: 404}
+  note: 'No OAuth metadata: the MCP server authenticates with the ak_live_ API key only (mcp/agentspodium-com-mcp.yml).'
+- host: https://a2a.agentspodium.com
+  role: A2A host
+  path_echo_control: passed
+  negative_control: {path: /.well-known/agentspodium-com-negative-control-7f3ab91c.json, status: 404, bytes: 21}
+  documents:
+  - {path: /.well-known/security.txt, status: 404}
+  - {path: /.well-known/openid-configuration, status: 404}
+  - {path: /.well-known/oauth-authorization-server, status: 404}
+  - {path: /.well-known/oauth-protected-resource, status: 404}
+  - {path: /.well-known/api-catalog, status: 404}
+  - {path: /.well-known/api-catalog.json, status: 404}
+  - {path: /.well-known/ai-plugin.json, status: 404}
+  - {path: /.well-known/ucp.json, status: 404}
+  - {path: /.well-known/acp.json, status: 404}
+  - {path: /.well-known/aauth-resource.json, status: 404}
+  - {path: /.well-known/apis.json, status: 404}
+  - {path: /apis.json, status: 404}
+  - {path: /apis.yml, status: 404}
+  - {path: /.well-known/agent-card.json, status: 200, type: application/json, file: ../a2a/agentspodium-com-directory-agent-card.json, note: 'directory card for the host root (509 bytes); the graded service card is at /hosting/.well-known/agent-card.json'}
+  - {path: /hosting/.well-known/agent-card.json, status: 200, type: application/json, file: ../a2a/agentspodium-com-agent-card.json}
+  - {path: /.well-known/agent.json, status: 404}
+  - {path: /hosting/.well-known/agent.json, status: 404}
+  - {path: /catalog.json, status: 200, type: application/json, note: 'services[1] agents[0]'}
+- host: https://hosting.defispace.com
+  role: developer docs host (DefiSpace Hosting, same operator)
+  path_echo_control: failed
+  soft_404_control: {path: /.well-known/agentspodium-com-negative-control-7f3ab91c.json, status: 200, bytes: 18908, type: text/html, note: 'SPA/static catch-all: every probed path below returned this identical shell'}
+  hit_count: 0
+  documents:
+  - {path: /.well-known/security.txt, status: 200, soft_404: true}
+  - {path: /.well-known/openid-configuration, status: 200, soft_404: true}
+  - {path: /.well-known/oauth-authorization-server, status: 200, soft_404: true}
+  - {path: /.well-known/oauth-protected-resource, status: 200, soft_404: true}
+  - {path: /.well-known/api-catalog, status: 200, soft_404: true}
+  - {path: /.well-known/api-catalog.json, status: 200, soft_404: true}
+  - {path: /.well-known/ai-plugin.json, status: 200, soft_404: true}
+  - {path: /.well-known/ucp.json, status: 200, soft_404: true}
+  - {path: /.well-known/acp.json, status: 200, soft_404: true}
+  - {path: /.well-known/aauth-resource.json, status: 200, soft_404: true}
+  - {path: /.well-known/apis.json, status: 200, soft_404: true}
+  - {path: /apis.json, status: 200, soft_404: true}
+  - {path: /apis.yml, status: 200, soft_404: true}
+  - {path: /.well-known/agent-card.json, status: 200, soft_404: true}
+  - {path: /.well-known/agent.json, status: 200, soft_404: true}
+  - {path: /.well-known/agent-skills/index.json, status: 200, type: application/json, file: ../skills/agentspodium-com-agent-skills-index.json, note: 'REAL — agentskills.io discovery 0.2.0 index, four skills with sha256 digests; content type and body distinguish it from the shell'}
+  - {path: /llms.txt, status: 200, type: text/plain, file: ../llms/agentspodium-com-hosting-llms.txt, note: REAL}
+  - {path: /openapi.json, status: 200, type: application/json, file: ../openapi/_original/agentspodium-com-openapi.json, note: 'REAL — OpenAPI 3.1.0, 52 operations, 162,590 bytes'}

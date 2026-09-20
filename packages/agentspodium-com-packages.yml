@@ -1,0 +1,20 @@
+generated: '2026-09-19'
+method: searched
+summary: >-
+  No first-party client library or CLI is published on any registry. The one first-party code artifact is the MCP + A2A
+  gateway (github.com/agentspodium/agent-gateway, TypeScript, npm name @agentpodium/agent-gateway 0.1.0) whose
+  package.json is "private": true — it is the server the provider hosts, not a client an integrator installs. The docs
+  present the API as curl-first for agents; no SDK page exists.
+package_count: 0
+official_sdk_count: 0
+packages: []
+searched:
+- {registry: npm, query: 'https://registry.npmjs.org/-/v1/search?text=agentspodium&size=10', result: 'total 0', http_status: 200}
+- {registry: npm, query: 'https://registry.npmjs.org/agentspodium', result: absent, http_status: 404}
+- {registry: pypi, query: 'https://pypi.org/pypi/agentspodium/json', result: absent, http_status: 404}
+- {registry: github, query: 'https://api.github.com/orgs/agentspodium/repos', result: 'agent-gateway (server, private package), agentspodium-skills (SKILL.md files)', http_status: 200}
+- {registry: docs, query: 'https://hosting.defispace.com/llms.txt + docs/integrations.md', result: 'no SDK or client-library page; MCP server and curl examples only'}
+note: >-
+  Maven Central, NuGet, pkg.go.dev, RubyGems, Packagist and crates.io were not queried by name because the provider names
+  no library for those ecosystems anywhere on its surface; the absence recorded here is of a first-party SDK, not of every
+  possible community package.

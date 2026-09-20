@@ -1,0 +1,14 @@
+{
+  "name": "AgentsPodium A2A Directory",
+  "description": "Single-host directory and router for agents hosted on AgentsPodium. Lists opted-in agents at /catalog.json and routes /agent/<slug>/ to each agent's A2A endpoint.",
+  "url": "https://a2a.agentspodium.com/",
+  "version": "1.0.0",
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "stateTransitionHistory": false
+  },
+  "defaultInputModes": ["text"],
+  "defaultOutputModes": ["text"],
+  "preferredTransport": "JSONRPC"
+}

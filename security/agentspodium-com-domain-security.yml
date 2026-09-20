@@ -1,0 +1,31 @@
+generated: '2026-09-19'
+method: probed
+source: live DNS/TLS/HTTP probes of apis.yml + OpenAPI hosts
+hosts:
+- host: agentspodium.com
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Nov 25 21:48:21 2026 GMT
+  hsts: false
+- host: hosting.defispace.com
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Dec  7 10:03:53 2026 GMT
+  hsts: false
+- host: mcp.agentspodium.com
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Nov 25 21:48:21 2026 GMT
+  hsts: false
+domains:
+- domain: agentspodium.com
+  dnssec: false
+  caa: []
+  spf: false
+  dmarc: true
+  dmarc_policy: none
+- domain: defispace.com
+  dnssec: false
+  caa: []
+  spf: false
+  dmarc: false

@@ -1,0 +1,31 @@
+# DefiSpace Hosting
+
+> Managed hosting of open-source AI agent platforms (Hermes, OpenClaw, n8n, Claude Code, OpenCode, Pi; Matomo on request), one platform per pod on our own servers, priced in dollars, with an HTTP API meant to be driven by agents. Base API URL: https://agentspodium.com/api. Plans: tiny $2.49/mo (1 GB RAM · 1 vCPU · 4 GB disk); small $4.99/mo (2 GB RAM · 2 vCPU · 6 GB disk); medium $9.99/mo (4 GB RAM · 2 vCPU · 8 GB disk); large $17.99/mo (8 GB RAM · 4 vCPU · 16 GB disk). 7 free days per pod, no card.
+
+## Docs
+- [Quickstart: seven calls to a running pod](https://hosting.defispace.com/docs/quickstart.md)
+- [Authentication: API keys and e-mail codes](https://hosting.defispace.com/docs/auth.md)
+- [Instances: create, read, change, data](https://hosting.defispace.com/docs/instances.md)
+- [Payment: card, USDT/USDC, Telegram Stars](https://hosting.defispace.com/docs/payment.md)
+- [Health: liveness, resources, status](https://hosting.defispace.com/docs/health.md)
+- [Webhooks: events pushed to your URL](https://hosting.defispace.com/docs/webhooks.md)
+- [Expiry: trial, grace, paid till](https://hosting.defispace.com/docs/expiry.md)
+- [Agent-to-agent: endpoint, token, card, peers](https://hosting.defispace.com/docs/a2a.md)
+- [Integrations: MCP, skills, messengers, n8n, own domain](https://hosting.defispace.com/docs/integrations.md)
+- [MCP server: hosting as tools at mcp.agentspodium.com](https://hosting.defispace.com/docs/mcp.md)
+- [Platforms: engines and what each supports](https://hosting.defispace.com/docs/platforms.md)
+- [Limits and rates](https://hosting.defispace.com/docs/limits.md)
+- [Errors and traps](https://hosting.defispace.com/docs/errors.md)
+
+## Skills
+- [build-report](https://hosting.defispace.com/skills/build-report/SKILL.md)
+- [connect-agents](https://hosting.defispace.com/skills/connect-agents/SKILL.md)
+- [deploy-agent](https://hosting.defispace.com/skills/deploy-agent/SKILL.md)
+- [deploy-app](https://hosting.defispace.com/skills/deploy-app/SKILL.md)
+
+## Optional
+- [Full docs in one file](https://hosting.defispace.com/llms-full.txt)
+- [OpenAPI 3.1 contract](https://hosting.defispace.com/openapi.json)
+- [Skill discovery index](https://hosting.defispace.com/.well-known/agent-skills/index.json)
+- [Human landing page](https://hosting.defispace.com/)
+- [Product site](https://agentspodium.com/)

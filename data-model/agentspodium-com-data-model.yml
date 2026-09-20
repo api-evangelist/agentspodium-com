@@ -1,0 +1,357 @@
+generated: '2026-09-19'
+method: derived
+source: openapi/agentspodium-com-openapi.yml (31 component schemas; $ref links, id-reference fields and /agents/{id}/... sub-resource paths); object semantics from https://hosting.defispace.com/docs/instances.md
+description: 'Entity graph of the AgentsPodium account API. The Agent (one hosted pod) is the hub: it belongs to a Persona, an Engine and a Tier, and owns its term, liveness, quota, backups, memory, payment
+  orders, webhook, A2A peers and (for the app engine) an AppConfig/BuildStatus. Catalog entities (Persona, Engine, Tier, ModelInfo, LlmProviderInfo, ToolsetInfo, PaymentProvider) are read-only reference
+  data.'
+id_prefixes:
+  Agent: agt_
+  user: usr_
+  WebhookEvent: evt_
+  webhook secret: whsec_
+  ApiKey: ak_live_
+  dseq (cluster namespace): ap-
+hub_entity: Agent
+entities:
+- name: ApiError
+  description: Uniform error body sent by the global error handler for every 4xx/5xx response.
+  fields: 2
+  key_fields: []
+- name: AgentQuota
+  description: Latest RAM/disk snapshot for a pod, refreshed about once a minute from the cluster.
+  fields: 8
+  key_fields:
+  - status
+- name: AgentTools
+  description: Enabled Hermes toolsets and user-defined MCP servers.
+  fields: 2
+  key_fields: []
+- name: McpServerConfig
+  description: null
+  fields: 6
+  key_fields: []
+- name: A2aPeerPublic
+  description: Another A2A agent this one may call by name. The peer's bearer token is write-only and never serialized back.
+  fields: 2
+  key_fields: []
+- name: Agent
+  description: One pod. Serialized with the engine encryption key and the plaintext-adjacent LLM key ciphertext stripped; every other stored field is returned as is.
+  fields: 37
+  key_fields:
+  - id
+  - personaId
+  - tier
+  - status
+  - endpointUrl
+  - domain
+  - engine
+  - a2aUrl
+- name: EngineCapabilities
+  description: null
+  fields: 9
+  key_fields: []
+- name: Engine
+  description: null
+  fields: 7
+  key_fields:
+  - id
+  - status
+- name: Tier
+  description: null
+  fields: 5
+  key_fields:
+  - id
+- name: PersonaL10n
+  description: null
+  fields: 7
+  key_fields: []
+- name: DemoLine
+  description: null
+  fields: 2
+  key_fields: []
+- name: Persona
+  description: 'Public catalog entry: a built-in persona, or a community persona once published.'
+  fields: 28
+  key_fields:
+  - id
+  - tier
+  - status
+- name: Subscription
+  description: A paid term for one agent. Returned verbatim by GET /subscriptions, including the raw license key used to activate it.
+  fields: 14
+  key_fields:
+  - id
+  - tier
+  - status
+- name: ApiKey
+  description: A machine credential. The secret itself (ak_live_…) is shown once, at creation, and never again.
+  fields: 6
+  key_fields:
+  - id
+- name: AgentTerm
+  description: The one answer to when this agent's current term ends.
+  fields: 6
+  key_fields: []
+- name: DomainCheck
+  description: null
+  fields: 4
+  key_fields:
+  - domain
+- name: Liveness
+  description: null
+  fields: 2
+  key_fields: []
+- name: BackupEntry
+  description: null
+  fields: 3
+  key_fields: []
+- name: AgentMemory
+  description: Read-only view of a Hermes agent's persona data.
+  fields: 4
+  key_fields: []
+- name: PaymentProvider
+  description: null
+  fields: 6
+  key_fields:
+  - id
+  - status
+- name: CryptoInfo
+  description: null
+  fields: 3
+  key_fields: []
+- name: CryptoOrder
+  description: null
+  fields: 13
+  key_fields:
+  - id
+  - status
+  - tier
+- name: StarsInfo
+  description: null
+  fields: 3
+  key_fields: []
+- name: StarsOrder
+  description: null
+  fields: 10
+  key_fields:
+  - id
+  - status
+  - tier
+- name: ModelInfo
+  description: null
+  fields: 5
+  key_fields:
+  - id
+- name: LlmProviderInfo
+  description: null
+  fields: 3
+  key_fields:
+  - id
+- name: ToolsetInfo
+  description: null
+  fields: 6
+  key_fields:
+  - id
+- name: WebhookEvent
+  description: The JSON body POSTed to your webhook URL. Verify `X-AgentsPodium-Signature` (`sha256=` + hex HMAC-SHA256 of the raw body with your secret) before trusting it.
+  fields: 5
+  key_fields:
+  - id
+  - type
+- name: WebhookDelivery
+  description: null
+  fields: 4
+  key_fields:
+  - status
+- name: AppConfig
+  description: 'Build and run configuration for engine "app": a customer repository served as frontend plus backend on one pod.'
+  fields: 11
+  key_fields: []
+- name: BuildStatus
+  description: null
+  fields: 5
+  key_fields: []
+relationships:
+- from: AgentTools
+  to: McpServerConfig
+  type: has_many
+  via: mcpServers
+  source: $ref
+- from: Agent
+  to: AgentQuota
+  type: has_one
+  via: quota
+  source: $ref
+- from: Agent
+  to: AgentTools
+  type: has_one
+  via: tools
+  source: $ref
+- from: Agent
+  to: A2aPeerPublic
+  type: has_many
+  via: a2aPeers
+  source: $ref
+- from: Agent
+  to: AppConfig
+  type: has_one
+  via: app
+  source: $ref
+- from: Engine
+  to: EngineCapabilities
+  type: has_one
+  via: capabilities
+  source: $ref
+- from: PersonaL10n
+  to: DemoLine
+  type: has_many
+  via: demo
+  source: $ref
+- from: Persona
+  to: DemoLine
+  type: has_many
+  via: demo
+  source: $ref
+- from: Persona
+  to: PersonaL10n
+  type: has_one
+  via: ru
+  source: $ref
+- from: Persona
+  to: PersonaL10n
+  type: has_one
+  via: es
+  source: $ref
+- from: Persona
+  to: PersonaL10n
+  type: has_one
+  via: pt
+  source: $ref
+- from: Persona
+  to: PersonaL10n
+  type: has_one
+  via: tr
+  source: $ref
+- from: Persona
+  to: PersonaL10n
+  type: has_one
+  via: ind
+  source: $ref
+- from: Agent
+  to: Persona
+  type: belongs_to
+  via: personaId
+  source: id-field
+- from: Agent
+  to: Tier
+  type: belongs_to
+  via: tier
+  source: id-field
+- from: Agent
+  to: LlmProviderInfo
+  type: belongs_to
+  via: llmProvider
+  source: id-field
+- from: Agent
+  to: Engine
+  type: belongs_to
+  via: engine
+  source: id-field
+- from: Persona
+  to: Tier
+  type: belongs_to
+  via: tier
+  source: id-field
+- from: Subscription
+  to: Agent
+  type: belongs_to
+  via: agentId
+  source: id-field
+- from: Subscription
+  to: Tier
+  type: belongs_to
+  via: tier
+  source: id-field
+- from: Subscription
+  to: PaymentProvider
+  type: belongs_to
+  via: provider
+  source: id-field
+- from: CryptoOrder
+  to: Agent
+  type: belongs_to
+  via: agentId
+  source: id-field
+- from: CryptoOrder
+  to: Tier
+  type: belongs_to
+  via: tier
+  source: id-field
+- from: StarsOrder
+  to: Agent
+  type: belongs_to
+  via: agentId
+  source: id-field
+- from: StarsOrder
+  to: Tier
+  type: belongs_to
+  via: tier
+  source: id-field
+- from: ModelInfo
+  to: PaymentProvider
+  type: belongs_to
+  via: provider
+  source: id-field
+- from: Agent
+  to: AgentTerm
+  type: has_one
+  via: GET /agents/{id}/term
+  source: path
+- from: Agent
+  to: Liveness
+  type: has_one
+  via: GET /agents/{id}/liveness
+  source: path
+- from: Agent
+  to: BackupEntry
+  type: has_many
+  via: GET /agents/{id}/backups
+  source: path
+- from: Agent
+  to: AgentMemory
+  type: has_one
+  via: GET /agents/{id}/memory
+  source: path
+- from: Agent
+  to: CryptoOrder
+  type: has_many
+  via: GET /agents/{id}/crypto-orders
+  source: path
+- from: Agent
+  to: StarsOrder
+  type: has_many
+  via: GET /agents/{id}/stars-orders
+  source: path
+- from: Agent
+  to: BuildStatus
+  type: has_one
+  via: GET /agents/{id}/build
+  source: path
+- from: Agent
+  to: WebhookEvent
+  type: has_many
+  via: webhookUrl / X-AgentsPodium-Event deliveries
+  source: docs/webhooks.md
+- from: Agent
+  to: A2aPeerPublic
+  type: has_many
+  via: PUT /agents/{id}/peers
+  source: path
+- from: Persona
+  to: Agent
+  type: has_many
+  via: personaId on POST /agents
+  source: path
+counts:
+  entities: 31
+  relationships: 36

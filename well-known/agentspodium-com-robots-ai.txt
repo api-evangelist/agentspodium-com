@@ -1,0 +1,76 @@
+# robots-ai.txt Specification (ADF-010)
+# https://www.ai-visibility.org.uk/specifications/robots-ai-txt/
+
+# AI Crawler Directives for AgentsPodium
+# Website: https://agentspodium.com
+# Last Updated: 2026-09-08
+# Supplements robots.txt, which stays authoritative for every crawler.
+
+User-agent: GPTBot
+Allow: /
+Disallow: /account
+Disallow: /agents/
+Disallow: /deploy/
+Disallow: /admin
+Disallow: /personas/mine
+Disallow: /personas/new
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /account
+Disallow: /agents/
+Disallow: /deploy/
+Disallow: /admin
+Disallow: /personas/mine
+Disallow: /personas/new
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /account
+Disallow: /agents/
+Disallow: /deploy/
+Disallow: /admin
+Disallow: /personas/mine
+Disallow: /personas/new
+
+User-agent: Claude-SearchBot
+Allow: /
+Disallow: /account
+Disallow: /agents/
+Disallow: /deploy/
+Disallow: /admin
+Disallow: /personas/mine
+Disallow: /personas/new
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /account
+Disallow: /agents/
+Disallow: /deploy/
+Disallow: /admin
+Disallow: /personas/mine
+Disallow: /personas/new
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /account
+Disallow: /agents/
+Disallow: /deploy/
+Disallow: /admin
+Disallow: /personas/mine
+Disallow: /personas/new
+
+User-agent: *
+Allow: /
+Disallow: /account
+Disallow: /agents/
+Disallow: /deploy/
+Disallow: /admin
+Disallow: /personas/mine
+Disallow: /personas/new
+
+Sitemap: https://agentspodium.com/sitemap.xml
+
+Discovery: https://agentspodium.com/llms.txt
+Discovery: https://agentspodium.com/ai.txt
+Discovery: https://agentspodium.com/identity.json

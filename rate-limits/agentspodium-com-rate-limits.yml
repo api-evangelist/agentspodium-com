@@ -1,0 +1,46 @@
+generated: '2026-09-19'
+method: searched
+source: https://hosting.defispace.com/docs/limits.md
+docs:
+- https://hosting.defispace.com/docs/limits.html
+- https://hosting.defispace.com/docs/auth.html
+- https://hosting.defispace.com/docs/errors.html
+limit_count: 1
+summary: >-
+  One published request-rate limit: POST /api/auth/request (the e-mail sign-in code) at 10 requests per 10 minutes per
+  IP, answered with 429. No general per-key or per-account request-rate ceiling is documented for the rest of the API,
+  and the OpenAPI declares 429 on only the two /auth operations. No rate-limit response headers (X-RateLimit-*,
+  RateLimit-*, Retry-After) are documented or declared; an exhausted caller sees only the status code and the uniform
+  {error, message} body. The other published ceilings are account quotas rather than rates and are recorded under quotas.
+rate_limits:
+- name: Sign-in code requests
+  scope: per-IP
+  limit: 10
+  window: 10 minutes
+  burst: null
+  applies_to: ['POST /auth/request']
+  exhaustion_status: 429
+  exhaustion_body: '{"error":"RATE_LIMITED"|"...","message":"..."} — the ApiError envelope; docs/errors.md lists 429 as "auth request rate limit — wait"'
+  headers: []
+  source: 'docs/auth.md "Rate limit on /auth/request: 10 requests per 10 minutes per IP"; docs/limits.md; OpenAPI POST /auth/request and POST /auth/verify declare 429'
+quotas:
+- name: Free pods per account
+  scope: per-account
+  limit: 3
+  metric: concurrent unpaid pods
+  exhaustion_status: 400
+  note: 'docs/instances.md: "Free pods per account: 3 at once. Above that the call answers 400 and asks to upgrade or delete one." Paid pods: no cap.'
+- name: Memory per pod
+  scope: per-pod
+  limit: plan RAM (1/2/4/8 GB)
+  metric: bytes
+  signal: 'quotaStatus: warn | paused on the agent record and GET /agents/{id}/usage (memoryPct); over the plan the pod is paused until upgraded or freed'
+- name: Backups
+  scope: per-pod
+  limit: daily snapshots kept 7 days
+- name: Synchronous build time
+  scope: per-call
+  note: 'create/rebuild calls are synchronous and take one to two minutes; docs advise a client timeout of at least 5 minutes'
+headers_observed: >-
+  Unauthenticated GET /api/tiers, /api/engines and /api/status responses on 2026-09-19 carried no X-RateLimit-*,
+  RateLimit-* or Retry-After headers.

@@ -64,5 +64,5 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-AgentsPodium is a company surfaced via the API Evangelist harvest backlog (source: a2a-registry) and added to the network as a stub for full-pipeline profiling.
+AgentsPodium runs personal AI agents around the clock, each on its own pod, and hosts open-source agent platforms (Hermes, OpenClaw, n8n, Claude Code, OpenCode, Pi) on per-pod plans. The same service is driven by agents through an HTTP account API (OpenAPI 3.1, 52 operations), a hosted MCP server (13 tools), an A2A agent (5 skills), published Agent Skills and signed webhooks. Developer docs live at https://hosting.defispace.com (DefiSpace Hosting, the same operator, Radiance Team). Surfaced via the a2a-registry harvest and profiled 2026-09-19.
 - https://agentspodium.com/

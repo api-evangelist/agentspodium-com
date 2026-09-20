@@ -1,0 +1,84 @@
+generated: '2026-09-19'
+method: searched
+format: custom-json
+source: >-
+  Derived from the 4xx responses declared in openapi/agentspodium-com-openapi.yml (52 operations; statuses declared:
+  400 on 28, 401 on 42, 403 on 2, 404 on 33, 429 on 2, plus 202/204 successes) and enriched from the provider's error
+  reference https://hosting.defispace.com/docs/errors.md ("Errors and traps"), which names the machine codes and the
+  remediation for each. The ApiError schema description lists the full code vocabulary.
+rfc9457: false
+envelope:
+  media_type: application/json
+  schema: ApiError
+  shape: '{ "error": "<CODE>", "message": "<why>" }'
+  fields:
+  - {name: error, type: string, required: true, description: 'Stable machine code: BAD_REQUEST, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, CONFLICT, RATE_LIMITED, INVALID_CODE, INTERNAL.'}
+  - {name: message, type: string, required: true, description: Human-readable reason, safe to show to whoever is driving the agent.}
+  note: >-
+    "Uniform error body sent by the global error handler for every 4xx/5xx response" (schema description). The same
+    body is what the MCP gateway wraps in a tool result with isError true, and what the A2A gateway maps to JSON-RPC
+    error -32001 for missing credentials.
+problems:
+- status: 400
+  code: BAD_REQUEST
+  title: Bad request — validation failed
+  declared_on: 28 operations (every request-body operation)
+  meaning: 'Unknown tier, engine below its minTier ("<Engine> requires at least the <tier> plan"), free-pod cap reached, a domain under agentspodium.com, a webhook URL that is not an absolute public https/http address (loopback, private ranges and credentials refused), or any other body validation failure.'
+  remediation: 'Read message; it says which field. Read minTier from GET /engines and tiers from GET /tiers rather than hard-coding.'
+  source: docs/errors.md; docs/instances.md; docs/webhooks.md
+- status: 401
+  code: UNAUTHORIZED
+  title: Missing, invalid, expired, or revoked credential
+  declared_on: 42 operations (every operation outside the public catalog, status and auth endpoints)
+  meaning: 'No bearer, an expired 30-day session token, or a revoked API key ("Invalid or revoked API key"). Unauthenticated calls return {"error":"UNAUTHORIZED","message":"Authentication required"} (observed on GET /api/agents, 2026-09-19).'
+  remediation: 'Re-authenticate. Keys do not expire; sessions do after 30 days. A leaked key: revoke it on the account page and create another.'
+  source: docs/errors.md; docs/auth.md; live probe
+- status: 403
+  code: FORBIDDEN
+  title: Not allowed for this credential
+  declared_on: ['POST /keys', 'DELETE /keys/{id}']
+  meaning: 'An API key trying to create or revoke keys (key management stays with the signed-in person), or acting on someone else''s agent.'
+  remediation: Use the person's session token for key management.
+  source: docs/errors.md; docs/auth.md
+- status: 404
+  code: NOT_FOUND
+  title: No such agent, key, or persona for this account
+  declared_on: 33 operations (every /agents/{id}... and /personas/{id} operation)
+  meaning: The id is not yours or has been deleted. Unknown routes also answer 404 with the same envelope (21-byte body observed on every missed path).
+  remediation: Check GET /agents.
+  source: docs/errors.md
+- status: 409
+  code: CONFLICT
+  title: Domain already in use
+  declared_on: not declared in the OpenAPI; documented
+  meaning: The custom domain given on create is already claimed.
+  remediation: Pick another domain.
+  source: docs/errors.md
+- status: 429
+  code: RATE_LIMITED
+  title: Sign-in code rate limit
+  declared_on: ['POST /auth/request', 'POST /auth/verify']
+  meaning: More than 10 POST /auth/request calls in 10 minutes from one IP.
+  remediation: Wait. No Retry-After header is documented.
+  source: docs/errors.md; docs/auth.md
+- status: 400
+  code: INVALID_CODE
+  title: Wrong or expired e-mail code
+  declared_on: ['POST /auth/verify']
+  meaning: The six-digit code is wrong or older than 10 minutes.
+  remediation: Request a new code.
+  source: ApiError code vocabulary; docs/auth.md ("valid 10 minutes")
+- status: 500
+  code: INTERNAL
+  title: Internal error
+  declared_on: not declared per operation; named in the ApiError code vocabulary
+  meaning: Global error handler fallback.
+  remediation: Retry later; for a pod that is up but not serving after three minutes, POST /agents/{id}/rebuild.
+  source: ApiError schema description; docs/health.md
+traps:
+- {symptom: 'Pod answers but says nothing', cause: 'no model key installed', fix: 'PATCH /agents/{id}/llm-key'}
+- {symptom: 'Model name rejected by the provider', cause: 'model does not belong to the provider of the key', fix: 'use the model id the key''s provider publishes'}
+- {symptom: 'Crypto sent before the order', cause: 'transfer raised the shared-address baseline and paid for nothing', fix: 'create the order first (POST /agents/{id}/crypto-order), then send the exact amount'}
+- {symptom: 'serving: false right after running', cause: 'engine still booting', fix: 'wait up to three minutes before acting; longer means rebuild'}
+- {symptom: 'A2A card returns a web page', cause: 'a2a toolset is off', fix: 'PATCH /agents/{id}/tools to enable a2a; sidecar is built on rebuild'}
+- {symptom: 'Domain refused', cause: 'names under agentspodium.com are assigned automatically', fix: 'use a domain you own and point an A record at it'}

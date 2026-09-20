@@ -1,0 +1,72 @@
+generated: '2026-09-19'
+method: probed
+source: https://agentspodium.com/api/tiers
+docs:
+- https://hosting.defispace.com/docs/payment.html
+- https://hosting.defispace.com/docs/limits.html
+- https://hosting.defispace.com/#pricing
+- https://agentspodium.com/faq-ai.txt
+provider: AgentsPodium
+providerId: agentspodium-com
+currency: USD
+plan_count: 4
+summary: >-
+  Four per-pod hosting plans, priced in USD monthly or yearly (yearly = ten months), read live from the public,
+  unauthenticated GET /api/tiers, which the provider's own ai.txt names as "the price charged". Every pod starts with a
+  7-day free trial with no card; free pods are capped at 3 per account. Model inference is never included — the customer
+  installs their own LLM key. Payment is by card via Gumroad (verified path); USDT/USDC on Ethereum and Telegram Stars
+  are documented as beta.
+trial:
+  days: 7
+  card_required: false
+  grace_days: 3
+  free_pods_per_account: 3
+  source: 'GET /api/tiers ("trial":{"days":7,"graceDays":3}); docs/limits.md "Free pods per account at once: 3"' 
+plans:
+- id: tiny
+  name: Tiny
+  price: 2.49
+  currency: USD
+  billing_period: month
+  annual_price: 24.9
+  included: {ram: "1 GB", vcpu: "1 (burst)", disk: "4 GB"}
+  engines_allowed: [hermes, openclaw, opencode, pi]
+  overage: "none — memory over the plan pauses the pod (quotaStatus paused) until upgraded or freed"
+- id: small
+  name: Small
+  price: 4.99
+  currency: USD
+  billing_period: month
+  annual_price: 49.9
+  included: {ram: "2 GB", vcpu: "2 (burst)", disk: "6 GB"}
+  engines_allowed: [hermes, openclaw, n8n, claude-code, opencode, pi, app]
+  overage: "none — memory over the plan pauses the pod until upgraded or freed"
+- id: medium
+  name: Medium
+  price: 9.99
+  currency: USD
+  billing_period: month
+  annual_price: 99.9
+  included: {ram: "4 GB", vcpu: "2 (burst)", disk: "8 GB"}
+  engines_allowed: all
+  overage: "none — memory over the plan pauses the pod until upgraded or freed"
+- id: large
+  name: Large
+  price: 17.99
+  currency: USD
+  billing_period: month
+  annual_price: 179.9
+  included: {ram: "8 GB", vcpu: "4 (burst)", disk: "16 GB"}
+  engines_allowed: all
+  overage: "none — memory over the plan pauses the pod until upgraded or freed"
+payment_methods:
+- {method: card, processor: Gumroad, status: verified, flow: 'GET /subscriptions/providers -> buyUrls per plan -> licence key by e-mail -> POST /agents/{id}/activate'}
+- {method: USDT/USDC on Ethereum (chainId 1), status: beta testing, flow: 'GET /crypto/info -> POST /agents/{id}/crypto-order -> send -> GET /agents/{id}/crypto-orders'}
+- {method: Telegram Stars, status: beta testing, flow: 'GET /stars/info -> POST /agents/{id}/stars-order -> GET /agents/{id}/stars-orders'}
+x-evidence:
+  fetched: '2026-09-19'
+  url: https://agentspodium.com/api/tiers
+  http_status: 200
+  content_type: application/json; charset=utf-8
+  body: '{"tiers":[{"id":"tiny","name":"Tiny","spec":"1 GB RAM · 1 vCPU · 4 GB disk","monthlyUsd":2.49,"annualUsd":24.9},{"id":"small",...,"monthlyUsd":4.99,"annualUsd":49.9},{"id":"medium",...,"monthlyUsd":9.99,"annualUsd":99.9},{"id":"large",...,"monthlyUsd":17.99,"annualUsd":179.9}],"trial":{"days":7,"graceDays":3}}'
+  corroborated_by: [https://agentspodium.com/identity.json (four schema.org Offer entries with the same prices), https://hosting.defispace.com/docs/payment.md, https://agentspodium.com/api/engines (minTier per engine)]

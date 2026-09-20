@@ -1,0 +1,39 @@
+# AgentsPodium
+
+> Personal AI agents that run around the clock on their own pod and answer in your messenger: pick a ready-made persona or deploy an open-source agent platform (Hermes, OpenClaw, n8n, Claude Code, OpenCode, Pi) on a plan priced in dollars, bring your own model key. 7 free days per pod, no card. Plans: tiny $2.49/mo (1 GB RAM · 1 vCPU · 4 GB disk); small $4.99/mo (2 GB RAM · 2 vCPU · 6 GB disk); medium $9.99/mo (4 GB RAM · 2 vCPU · 8 GB disk); large $17.99/mo (8 GB RAM · 4 vCPU · 16 GB disk). The same service is driven by agents through an HTTP API, an MCP server and an A2A agent; the developer docs live at https://hosting.defispace.com.
+
+## For agents
+- [Developer docs, llms.txt](https://hosting.defispace.com/llms.txt): quickstart, auth, instances, payment, health, expiry, A2A, integrations
+- [OpenAPI 3.1](https://hosting.defispace.com/openapi.json): the account API at https://agentspodium.com/api
+- [MCP server](https://hosting.defispace.com/docs/mcp.md): https://mcp.agentspodium.com/mcp (Streamable HTTP), 13 tools
+- [A2A agent card](https://a2a.agentspodium.com/hosting/.well-known/agent-card.json): create, check and renew pods over JSON-RPC
+- [Public catalog of listed agents](https://agentspodium.com/api/a2a-catalog): AgentsPodium-hosted agents whose owners chose to be listed
+- [Skill discovery index](https://hosting.defispace.com/.well-known/agent-skills/index.json)
+
+## Skills
+- [connect-agents](https://agentspodium.com/skills/connect-agents)
+- [deploy-agent](https://agentspodium.com/skills/deploy-agent)
+- [build-report](https://agentspodium.com/skills/build-report)
+- [deploy-app](https://agentspodium.com/skills/deploy-app)
+
+## Hosting by platform
+- [Hermes Agent hosting — always on, from $2.49](https://agentspodium.com/hosting/hermes)
+- [OpenClaw hosting — your gateway, always online](https://agentspodium.com/hosting/openclaw)
+- [n8n hosting — self-hosted automation from $4.99](https://agentspodium.com/hosting/n8n)
+- [Hosted Claude Code — a coding agent that stays up](https://agentspodium.com/hosting/claude-code)
+- [OpenCode hosting — open-source coding agent, always on](https://agentspodium.com/hosting/opencode)
+- [Pi agent hosting — minimal coding agent, always on](https://agentspodium.com/hosting/pi)
+
+## For people
+- [Catalog of personas](https://agentspodium.com/catalog)
+- [Guides](https://agentspodium.com/articles)
+- [Partners](https://agentspodium.com/partners)
+- [Account and API keys](https://agentspodium.com/account)
+
+## Optional
+- [Sitemap](https://agentspodium.com/sitemap.xml)
+- [Hosting site for people](https://hosting.defispace.com/)
+- [AI usage guidance](https://agentspodium.com/ai.txt)
+- [Identity](https://agentspodium.com/identity.json)
+- [FAQ for AI](https://agentspodium.com/faq-ai.txt)
+- [Developer context](https://agentspodium.com/developer-ai.txt)

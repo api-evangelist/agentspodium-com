@@ -1,0 +1,45 @@
+generated: '2026-09-19'
+method: searched
+source: https://hosting.defispace.com/docs/
+versioning:
+  scheme: none
+  current: unversioned path (/api/...); OpenAPI info.version 1.0.0
+  docs: https://hosting.defispace.com/openapi.json
+  note: >-
+    No version segment, header or date pin. The OpenAPI (Last-Modified 13 Sep 2026) is the contract of record and the
+    docs state the live catalog endpoints (/api/tiers, /api/engines) are "the source of truth" over any snapshot in the
+    docs. The MCP server reports its own version (1.0.4) in initialize; the A2A card carries version 0.2.0.
+deprecation:
+  policy_url: null
+  sunset_header: false
+  deprecation_header: false
+  note: No deprecation policy, Sunset/Deprecation header support, or deprecated operations are published; the OpenAPI marks nothing deprecated.
+changelog:
+  url: null
+  note: >-
+    No dated API changelog. Per-feature status lines inside the docs ("Status (verified 2026-09-09 with a real domain)",
+    "Status, 2026-09-13" in deploy-app SKILL.md) and the skill versions (deploy-agent 1.0.2, deploy-app 1.1.0) are the
+    only dated change signals. /changelog on agentspodium.com is the SPA shell, not a page.
+sla:
+  url: null
+  uptime_target: null
+  note: No SLA is published.
+status_page: https://agentspodium.com/api/status
+status_page_note: >-
+  Machine-readable only: GET /api/status returns {"status":{"status":"operational","services":{"account":"ok","deployer":"ok"}}}
+  (observed 2026-09-19) and GET /healthz returns {"ok":true}. There is no human status page; status.agentspodium.com
+  does not resolve to one (404) and /status on the product site is the SPA shell.
+support_lifetime:
+  stated_period: null
+  note: No support period or end-of-life commitment is published for the API or the hosted engines.
+resource_lifecycle:
+  description: The pod (agent) resource has a documented lifecycle that an agent operating the API must track; it is the closest thing to a lifecycle contract the provider publishes.
+  states: [provisioning, running, stopped, failed, deleted]
+  term_modes:
+  - {mode: trial, stopsAt: created + 7 days (pod paused), deletesAt: stopsAt + 3 days}
+  - {mode: grace, stopsAt: when the paid subscription lapsed, deletesAt: stopsAt + 3 days}
+  - {mode: paid, paidTill: end of the paid period; no stop or delete dates}
+  - {mode: internal, note: provider's own pods, never expire}
+  notifications: 'e-mail 3 days before deletion; webhook deletion.warning at 3, 2, 1 days and once when stopped'
+  docs: https://hosting.defispace.com/docs/expiry.html
+deprecated_operations: []
