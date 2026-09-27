@@ -8,6 +8,22 @@ description: >-
   hosted MCP server with 13 tools, an A2A agent with five skills, four published Agent Skills, and signed webhooks. The
   developer documentation lives on the operator's second brand, DefiSpace Hosting (hosting.defispace.com); the company
   behind both is Radiance Team.
+deliveryModel:
+  model: saas
+  license_evidence:
+    not_product:
+    - agentspodium/agent-gateway
+  open_source: unknown
+  commercial: true
+  callable_host: true
+  label: Hosted service · you call their endpoint
+  confidence: low
+  source:
+  - openapi
+  - pricing
+  - repository-not-product
+  generated: '2026-09-25'
+  method: derived
 image: https://agentspodium.com/og.png
 url: https://raw.githubusercontent.com/api-evangelist/agentspodium-com/refs/heads/main/apis.yml
 x-type: company
@@ -22,7 +38,7 @@ tags:
 - Agent Hosting
 - MCP
 - A2A
-- agent-native
+- Agent-Native
 - Hosting
 - Webhook
 - Personal Assistants
@@ -39,83 +55,16 @@ tags_raw:
 - Company
 - Webhooks
 apis:
-- aid: agentspodium-com:account-api
-  name: AgentsPodium Account API
-  description: >-
-    The HTTP API behind the AgentsPodium dashboard, published as an agent-facing subset (OpenAPI 3.1.0, 52 operations):
-    passwordless sign-in and API keys, the public catalog of personas, tiers, engines, tools and models, the full pod
-    lifecycle (create, upgrade, configure model key / tools / channels / instructions / peers, pause, resume, rebuild,
-    delete), health and quota, backups and export, payment by card, USDT/USDC or Telegram Stars, signed webhooks, custom
-    domains and the public A2A directory. Bearer ak_live_ key or 30-day session token; eleven operations are public.
-  image: https://agentspodium.com/og.png
-  humanURL: https://hosting.defispace.com/docs/
-  baseURL: https://agentspodium.com/api
-  tags:
-  - AI Agents
-  - Agent Hosting
-  - Hosting
-  - Webhook
-  - Payments
-  tags_raw:
-  - ai-agents
-  - agent-hosting
-  - hosting
-  - webhooks
-  - payments
-  - Webhooks
-  properties:
-  - type: OpenAPI
-    url: openapi/agentspodium-com-openapi.yml
-  - type: OpenAPI
-    name: OpenAPI (provider-hosted, JSON)
-    url: https://hosting.defispace.com/openapi.json
-  - type: Documentation
-    url: https://hosting.defispace.com/docs/
-  - type: APIReference
-    name: OpenAPI 3.1 contract (API reference)
-    url: https://hosting.defispace.com/openapi.json
-  - type: GettingStarted
-    url: https://hosting.defispace.com/docs/quickstart.html
-  - type: Authentication
-    url: authentication/agentspodium-com-authentication.yml
-  - type: Authentication
-    name: Authentication docs
-    url: https://hosting.defispace.com/docs/auth.html
-  - type: Conventions
-    url: conventions/agentspodium-com-conventions.yml
-  - type: ErrorCatalog
-    url: errors/agentspodium-com-problem-types.yml
-  - type: ErrorCatalog
-    name: Errors and traps (docs)
-    url: https://hosting.defispace.com/docs/errors.html
-  - type: RateLimits
-    url: rate-limits/agentspodium-com-rate-limits.yml
-  - type: RateLimits
-    name: Limits and rates (docs)
-    url: https://hosting.defispace.com/docs/limits.html
-  - type: Webhooks
-    url: asyncapi/agentspodium-com-webhooks.yml
-  - type: Webhooks
-    name: Webhooks docs
-    url: https://hosting.defispace.com/docs/webhooks.html
-  - type: DataModel
-    url: data-model/agentspodium-com-data-model.yml
-  - type: Overlay
-    url: overlays/agentspodium-com-openapi-overlay.yaml
-  - type: Lifecycle
-    url: lifecycle/agentspodium-com-lifecycle.yml
-  - type: StatusPage
-    name: Platform status (JSON)
-    url: https://agentspodium.com/api/status
 - aid: agentspodium-com:mcp-server
   name: AgentsPodium Hosting MCP Server
   description: >-
-    Hosted, agent-native MCP server (Streamable HTTP, protocol 2025-06-18, server agentspodium-hosting 1.0.4) exposing
-    hosting as 13 tools — list_platforms, list_instances, create_instance, get_instance_health, get_instance_term,
-    set_llm_key, pause/resume/rebuild/delete_instance, get_payment_options, set_peers, set_webhook — plus a
-    deploy-checklist prompt and an agentspodium://docs resource. tools/list answers anonymously with full input and
-    output schemas and safety annotations; every account tool needs the caller's ak_live_ API key. Stateless: each call
-    is one account-API request on the caller's behalf. Source: github.com/agentspodium/agent-gateway.
+    Hosted, agent-native MCP server (Streamable HTTP, protocol 2025-06-18, server agentspodium-hosting
+    1.0.4) exposing hosting as 13 tools — list_platforms, list_instances, create_instance, get_instance_health,
+    get_instance_term, set_llm_key, pause/resume/rebuild/delete_instance, get_payment_options, set_peers,
+    set_webhook — plus a deploy-checklist prompt and an agentspodium://docs resource. tools/list answers
+    anonymously with full input and output schemas and safety annotations; every account tool needs the
+    caller's ak_live_ API key. Stateless: each call is one account-API request on the caller's behalf.
+    Source: github.com/agentspodium/agent-gateway.
   image: https://agentspodium.com/og.png
   humanURL: https://hosting.defispace.com/docs/mcp.html
   baseURL: https://mcp.agentspodium.com/mcp
@@ -123,7 +72,7 @@ apis:
   - MCP
   - AI Agents
   - Agent Hosting
-  - agent-native
+  - Agent-Native
   tags_raw:
   - mcp
   - ai-agents
@@ -145,10 +94,11 @@ apis:
   name: AgentsPodium Hosting A2A Agent
   description: >-
     The hosting service as an A2A agent (protocol 0.3.0, JSON-RPC message/send at https://a2a.agentspodium.com/hosting/)
-    with five skills — create-instance, instance-health, instance-term, list-platforms, payment-options — each callable
-    with a structured data part or a one-line text command. list-platforms and help answer without a key; account
-    skills need the caller's ak_live_ API key (JSON-RPC error -32001 without it). The same host is the platform's agent
-    directory: /catalog.json lists opted-in customer pods and /agent/<slug>/ routes to each pod's own A2A endpoint.
+    with five skills — create-instance, instance-health, instance-term, list-platforms, payment-options
+    — each callable with a structured data part or a one-line text command. list-platforms and help answer
+    without a key; account skills need the caller's ak_live_ API key (JSON-RPC error -32001 without it).
+    The same host is the platform's agent directory: /catalog.json lists opted-in customer pods and /agent/<slug>/
+    routes to each pod's own A2A endpoint.
   image: https://agentspodium.com/og.png
   humanURL: https://hosting.defispace.com/docs/a2a.html
   baseURL: https://a2a.agentspodium.com/hosting/
@@ -156,7 +106,7 @@ apis:
   - A2A
   - AI Agents
   - Agent Hosting
-  - agent-native
+  - Agent-Native
   tags_raw:
   - a2a
   - ai-agents
@@ -172,6 +122,286 @@ apis:
     url: https://hosting.defispace.com/docs/a2a.html
   - type: SourceCode
     url: https://github.com/agentspodium/agent-gateway
+- aid: agentspodium-com:agentspodium-com-a2a-api
+  name: AgentsPodium A2A API
+  description: The public agent-to-agent directory.
+  humanURL: https://hosting.defispace.com/docs/
+  baseURL: https://agentspodium.com/api
+  tags:
+  - A2A
+  properties:
+  - type: OpenAPI
+    url: openapi/agentspodium-com-a2a-api-openapi.yml
+  - type: Documentation
+    url: https://hosting.defispace.com/docs/
+  - type: APIReference
+    url: https://hosting.defispace.com/openapi.json
+  - type: GettingStarted
+    url: https://hosting.defispace.com/docs/quickstart.html
+  - type: Authentication
+    url: authentication/agentspodium-com-authentication.yml
+  - type: Authentication
+    url: https://hosting.defispace.com/docs/auth.html
+  - type: Conventions
+    url: conventions/agentspodium-com-conventions.yml
+  - type: ErrorCatalog
+    url: errors/agentspodium-com-problem-types.yml
+  - type: ErrorCatalog
+    url: https://hosting.defispace.com/docs/errors.html
+  - type: RateLimits
+    url: rate-limits/agentspodium-com-rate-limits.yml
+  - type: RateLimits
+    url: https://hosting.defispace.com/docs/limits.html
+  - type: Webhooks
+    url: asyncapi/agentspodium-com-webhooks.yml
+  - type: Webhooks
+    url: https://hosting.defispace.com/docs/webhooks.html
+  - type: DataModel
+    url: data-model/agentspodium-com-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/agentspodium-com-lifecycle.yml
+  - type: StatusPage
+    url: https://agentspodium.com/api/status
+- aid: agentspodium-com:agentspodium-com-agents-api
+  name: AgentsPodium Agents API
+  description: Create, configure, and operate a pod.
+  humanURL: https://hosting.defispace.com/docs/
+  baseURL: https://agentspodium.com/api
+  tags:
+  - Agents
+  properties:
+  - type: OpenAPI
+    url: openapi/agentspodium-com-agents-api-openapi.yml
+  - type: Documentation
+    url: https://hosting.defispace.com/docs/
+  - type: APIReference
+    url: https://hosting.defispace.com/openapi.json
+  - type: GettingStarted
+    url: https://hosting.defispace.com/docs/quickstart.html
+  - type: Authentication
+    url: authentication/agentspodium-com-authentication.yml
+  - type: Authentication
+    url: https://hosting.defispace.com/docs/auth.html
+  - type: Conventions
+    url: conventions/agentspodium-com-conventions.yml
+  - type: ErrorCatalog
+    url: errors/agentspodium-com-problem-types.yml
+  - type: ErrorCatalog
+    url: https://hosting.defispace.com/docs/errors.html
+  - type: RateLimits
+    url: rate-limits/agentspodium-com-rate-limits.yml
+  - type: RateLimits
+    url: https://hosting.defispace.com/docs/limits.html
+  - type: Webhooks
+    url: asyncapi/agentspodium-com-webhooks.yml
+  - type: Webhooks
+    url: https://hosting.defispace.com/docs/webhooks.html
+  - type: DataModel
+    url: data-model/agentspodium-com-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/agentspodium-com-lifecycle.yml
+  - type: StatusPage
+    url: https://agentspodium.com/api/status
+- aid: agentspodium-com:agentspodium-com-api-keys-api
+  name: AgentsPodium API keys API
+  description: Machine credentials for agents.
+  humanURL: https://hosting.defispace.com/docs/
+  baseURL: https://agentspodium.com/api
+  tags:
+  - API keys
+  properties:
+  - type: OpenAPI
+    url: openapi/agentspodium-com-api-keys-api-openapi.yml
+  - type: Documentation
+    url: https://hosting.defispace.com/docs/
+  - type: APIReference
+    url: https://hosting.defispace.com/openapi.json
+  - type: GettingStarted
+    url: https://hosting.defispace.com/docs/quickstart.html
+  - type: Authentication
+    url: authentication/agentspodium-com-authentication.yml
+  - type: Authentication
+    url: https://hosting.defispace.com/docs/auth.html
+  - type: Conventions
+    url: conventions/agentspodium-com-conventions.yml
+  - type: ErrorCatalog
+    url: errors/agentspodium-com-problem-types.yml
+  - type: ErrorCatalog
+    url: https://hosting.defispace.com/docs/errors.html
+  - type: RateLimits
+    url: rate-limits/agentspodium-com-rate-limits.yml
+  - type: RateLimits
+    url: https://hosting.defispace.com/docs/limits.html
+  - type: Webhooks
+    url: asyncapi/agentspodium-com-webhooks.yml
+  - type: Webhooks
+    url: https://hosting.defispace.com/docs/webhooks.html
+  - type: DataModel
+    url: data-model/agentspodium-com-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/agentspodium-com-lifecycle.yml
+  - type: StatusPage
+    url: https://agentspodium.com/api/status
+- aid: agentspodium-com:agentspodium-com-auth-api
+  name: AgentsPodium Auth API
+  description: Sign in.
+  humanURL: https://hosting.defispace.com/docs/
+  baseURL: https://agentspodium.com/api
+  tags:
+  - Auth
+  properties:
+  - type: OpenAPI
+    url: openapi/agentspodium-com-auth-api-openapi.yml
+  - type: Documentation
+    url: https://hosting.defispace.com/docs/
+  - type: APIReference
+    url: https://hosting.defispace.com/openapi.json
+  - type: GettingStarted
+    url: https://hosting.defispace.com/docs/quickstart.html
+  - type: Authentication
+    url: authentication/agentspodium-com-authentication.yml
+  - type: Authentication
+    url: https://hosting.defispace.com/docs/auth.html
+  - type: Conventions
+    url: conventions/agentspodium-com-conventions.yml
+  - type: ErrorCatalog
+    url: errors/agentspodium-com-problem-types.yml
+  - type: ErrorCatalog
+    url: https://hosting.defispace.com/docs/errors.html
+  - type: RateLimits
+    url: rate-limits/agentspodium-com-rate-limits.yml
+  - type: RateLimits
+    url: https://hosting.defispace.com/docs/limits.html
+  - type: Webhooks
+    url: asyncapi/agentspodium-com-webhooks.yml
+  - type: Webhooks
+    url: https://hosting.defispace.com/docs/webhooks.html
+  - type: DataModel
+    url: data-model/agentspodium-com-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/agentspodium-com-lifecycle.yml
+  - type: StatusPage
+    url: https://agentspodium.com/api/status
+- aid: agentspodium-com:agentspodium-com-catalog-api
+  name: AgentsPodium Catalog API
+  description: 'Read-only reference data: personas, tiers, engines, tools, models, providers.'
+  humanURL: https://hosting.defispace.com/docs/
+  baseURL: https://agentspodium.com/api
+  tags:
+  - Catalog
+  properties:
+  - type: OpenAPI
+    url: openapi/agentspodium-com-catalog-api-openapi.yml
+  - type: Documentation
+    url: https://hosting.defispace.com/docs/
+  - type: APIReference
+    url: https://hosting.defispace.com/openapi.json
+  - type: GettingStarted
+    url: https://hosting.defispace.com/docs/quickstart.html
+  - type: Authentication
+    url: authentication/agentspodium-com-authentication.yml
+  - type: Authentication
+    url: https://hosting.defispace.com/docs/auth.html
+  - type: Conventions
+    url: conventions/agentspodium-com-conventions.yml
+  - type: ErrorCatalog
+    url: errors/agentspodium-com-problem-types.yml
+  - type: ErrorCatalog
+    url: https://hosting.defispace.com/docs/errors.html
+  - type: RateLimits
+    url: rate-limits/agentspodium-com-rate-limits.yml
+  - type: RateLimits
+    url: https://hosting.defispace.com/docs/limits.html
+  - type: Webhooks
+    url: asyncapi/agentspodium-com-webhooks.yml
+  - type: Webhooks
+    url: https://hosting.defispace.com/docs/webhooks.html
+  - type: DataModel
+    url: data-model/agentspodium-com-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/agentspodium-com-lifecycle.yml
+  - type: StatusPage
+    url: https://agentspodium.com/api/status
+- aid: agentspodium-com:agentspodium-com-payment-api
+  name: AgentsPodium Payment API
+  description: Subscriptions and payment providers.
+  humanURL: https://hosting.defispace.com/docs/
+  baseURL: https://agentspodium.com/api
+  tags:
+  - Payment
+  properties:
+  - type: OpenAPI
+    url: openapi/agentspodium-com-payment-api-openapi.yml
+  - type: Documentation
+    url: https://hosting.defispace.com/docs/
+  - type: APIReference
+    url: https://hosting.defispace.com/openapi.json
+  - type: GettingStarted
+    url: https://hosting.defispace.com/docs/quickstart.html
+  - type: Authentication
+    url: authentication/agentspodium-com-authentication.yml
+  - type: Authentication
+    url: https://hosting.defispace.com/docs/auth.html
+  - type: Conventions
+    url: conventions/agentspodium-com-conventions.yml
+  - type: ErrorCatalog
+    url: errors/agentspodium-com-problem-types.yml
+  - type: ErrorCatalog
+    url: https://hosting.defispace.com/docs/errors.html
+  - type: RateLimits
+    url: rate-limits/agentspodium-com-rate-limits.yml
+  - type: RateLimits
+    url: https://hosting.defispace.com/docs/limits.html
+  - type: Webhooks
+    url: asyncapi/agentspodium-com-webhooks.yml
+  - type: Webhooks
+    url: https://hosting.defispace.com/docs/webhooks.html
+  - type: DataModel
+    url: data-model/agentspodium-com-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/agentspodium-com-lifecycle.yml
+  - type: StatusPage
+    url: https://agentspodium.com/api/status
+- aid: agentspodium-com:agentspodium-com-status-api
+  name: AgentsPodium Status API
+  description: Platform health.
+  humanURL: https://hosting.defispace.com/docs/
+  baseURL: https://agentspodium.com/api
+  tags:
+  - Status
+  properties:
+  - type: OpenAPI
+    url: openapi/agentspodium-com-status-api-openapi.yml
+  - type: Documentation
+    url: https://hosting.defispace.com/docs/
+  - type: APIReference
+    url: https://hosting.defispace.com/openapi.json
+  - type: GettingStarted
+    url: https://hosting.defispace.com/docs/quickstart.html
+  - type: Authentication
+    url: authentication/agentspodium-com-authentication.yml
+  - type: Authentication
+    url: https://hosting.defispace.com/docs/auth.html
+  - type: Conventions
+    url: conventions/agentspodium-com-conventions.yml
+  - type: ErrorCatalog
+    url: errors/agentspodium-com-problem-types.yml
+  - type: ErrorCatalog
+    url: https://hosting.defispace.com/docs/errors.html
+  - type: RateLimits
+    url: rate-limits/agentspodium-com-rate-limits.yml
+  - type: RateLimits
+    url: https://hosting.defispace.com/docs/limits.html
+  - type: Webhooks
+    url: asyncapi/agentspodium-com-webhooks.yml
+  - type: Webhooks
+    url: https://hosting.defispace.com/docs/webhooks.html
+  - type: DataModel
+    url: data-model/agentspodium-com-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/agentspodium-com-lifecycle.yml
+  - type: StatusPage
+    url: https://agentspodium.com/api/status
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
@@ -261,3 +491,10 @@ x-enrichment:
   status: enriched
   artifacts_added: 41
   pass: local-v3
+x-a2a:
+  verified: true
+  probed: '2026-09-26'
+  url: "https://a2a.agentspodium.com/hosting/.well-known/agent-card.json"
+  grade: "conformant"
+  protocol_version: "0.3.0"
+  control: 404

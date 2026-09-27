@@ -1,0 +1,35 @@
+{
+  "provider": "agentspodium-com",
+  "sources": [
+    "_original/agentspodium-com-openapi.json",
+    "agentspodium-com-openapi.yml"
+  ],
+  "outputs": [
+    "agentspodium-com-a2a-api-openapi.yml",
+    "agentspodium-com-api-keys-api-openapi.yml",
+    "agentspodium-com-agents-api-openapi.yml",
+    "agentspodium-com-auth-api-openapi.yml",
+    "agentspodium-com-catalog-api-openapi.yml",
+    "agentspodium-com-payment-api-openapi.yml",
+    "agentspodium-com-status-api-openapi.yml"
+  ],
+  "archived": [
+    "archived openapi/agentspodium-com-openapi.yml"
+  ],
+  "errors": [],
+  "warnings": [],
+  "notes": [
+    "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
+    "agentspodium-com-openapi.json: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "agentspodium-com-openapi.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "tag 'A2A' spans 2 source specs (agentspodium-com-openapi.json, agentspodium-com-openapi.yml): per-path servers applied",
+    "tag 'API keys' spans 2 source specs (agentspodium-com-openapi.json, agentspodium-com-openapi.yml): per-path servers applied",
+    "tag 'Agents' spans 2 source specs (agentspodium-com-openapi.json, agentspodium-com-openapi.yml): per-path servers applied",
+    "tag 'Auth' spans 2 source specs (agentspodium-com-openapi.json, agentspodium-com-openapi.yml): per-path servers applied",
+    "tag 'Catalog' spans 2 source specs (agentspodium-com-openapi.json, agentspodium-com-openapi.yml): per-path servers applied",
+    "tag 'Payment' spans 2 source specs (agentspodium-com-openapi.json, agentspodium-com-openapi.yml): per-path servers applied",
+    "tag 'Status' spans 2 source specs (agentspodium-com-openapi.json, agentspodium-com-openapi.yml): per-path servers applied",
+    "apis.yml register: written (+7 apis, 9 total)"
+  ],
+  "skipped": []
+}

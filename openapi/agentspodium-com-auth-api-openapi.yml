@@ -1,0 +1,179 @@
+openapi: 3.2.0
+info:
+  title: Agentspodium Com Auth API
+  version: 1.0.0
+  description: 'Operations tagged Auth across 2 of this provider''s published API definitions: agentspodium-com-openapi.json, agentspodium-com-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://agentspodium.com/api
+security:
+- bearerAuth: []
+tags:
+- name: Auth
+  description: Sign in.
+paths:
+  /auth/request:
+    post:
+      summary: Request a six-digit sign-in code by e-mail
+      tags:
+      - Auth
+      description: Send this first when authenticating with an e-mail address instead of an API key. Always answers 202, whether or not the address has an account — never poll this for existence. The code is valid 10 minutes; feed it to POST /auth/verify.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - email
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '202':
+          description: Accepted — a code was sent (or the address does not exist; the response looks the same either way).
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - ok
+                properties:
+                  ok:
+                    type: boolean
+                  devCode:
+                    type: string
+                    description: Only present when the server runs with devShowCode (local/dev).
+        '400':
+          description: Bad request — the body failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '429':
+          description: Rate limited.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      security: []
+      operationId: postAuthRequest
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /auth/verify:
+    post:
+      summary: Exchange an e-mail code for a bearer token
+      tags:
+      - Auth
+      description: 'Call this right after POST /auth/request with the six-digit code the address received. The returned token works as `Authorization: Bearer ` on every authenticated call below; it lives 30 days. For an agent that cannot read the mailbox itself, mint an API key from the account page instead (see bearerAuth).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - email
+              - code
+              properties:
+                email:
+                  type: string
+                  format: email
+                code:
+                  type: string
+                  pattern: ^\d{6}$
+                attribution:
+                  type: object
+                  description: Optional marketing attribution; safe to omit.
+                  nullable: true
+                  required:
+                  - anonId
+                  properties:
+                    anonId:
+                      type: string
+                    utmSource:
+                      type:
+                      - string
+                      - 'null'
+                    utmMedium:
+                      type:
+                      - string
+                      - 'null'
+                    utmCampaign:
+                      type:
+                      - string
+                      - 'null'
+                    referrer:
+                      type:
+                      - string
+                      - 'null'
+      responses:
+        '200':
+          description: Signed in.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - token
+                - user
+                properties:
+                  token:
+                    type: string
+                  user:
+                    type: object
+                    required:
+                    - id
+                    - email
+                    properties:
+                      id:
+                        type: string
+                      email:
+                        type: string
+        '400':
+          description: Bad request — the body failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '429':
+          description: Rate limited.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      security: []
+      operationId: postAuthVerify
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+components:
+  schemas:
+    ApiError:
+      type: object
+      description: Uniform error body sent by the global error handler for every 4xx/5xx response.
+      required:
+      - error
+      - message
+      properties:
+        error:
+          type: string
+          description: Stable machine code, e.g. BAD_REQUEST, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, CONFLICT, RATE_LIMITED, INVALID_CODE, INTERNAL.
+        message:
+          type: string
+          description: Human-readable reason, safe to show to whoever is driving the agent.
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: An API key `ak_live_…` created on the account page, or a session token from /auth/verify.
+x-refined-from:
+- agentspodium-com-openapi.json
+- agentspodium-com-openapi.yml

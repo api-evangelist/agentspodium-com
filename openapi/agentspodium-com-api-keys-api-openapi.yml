@@ -1,0 +1,191 @@
+openapi: 3.2.0
+info:
+  title: Agentspodium Com API keys API
+  version: 1.0.0
+  description: 'Operations tagged API keys across 2 of this provider''s published API definitions: agentspodium-com-openapi.json, agentspodium-com-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://agentspodium.com/api
+security:
+- bearerAuth: []
+tags:
+- name: API Keys
+  description: Machine credentials for agents.
+paths:
+  /keys:
+    get:
+      summary: List this account's API keys
+      tags:
+      - API Keys
+      description: Use to check what keys already exist before minting another; secrets are never included, only id/name/prefix/timestamps. Requires a session token — a key cannot list keys on its own behalf is untrue, but it also cannot mint or revoke one (see POST/DELETE below).
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - keys
+                properties:
+                  keys:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ApiKey'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: getKeys
+      x-operation-id-source: derived
+    post:
+      summary: Mint a new API key for this account
+      tags:
+      - API Keys
+      description: 'Call once from a signed-in session to create the credential an agent will use going forward (`Authorization: Bearer ak_live_…`). The secret is returned exactly once, in this response, under `secret` — store it immediately, it cannot be retrieved again. Refused (403) when called with an API key rather than a session token, so a leaked key cannot mint its own replacements.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - name
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 60
+      responses:
+        '200':
+          description: Created.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - key
+                - secret
+                properties:
+                  key:
+                    $ref: '#/components/schemas/ApiKey'
+                  secret:
+                    type: string
+                    example: ak_live_…
+                    description: The only time the full secret is ever returned.
+        '400':
+          description: Bad request — the body failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '403':
+          description: The credential does not carry this right (e.g. an API key managing keys).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: postKeys
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /keys/{id}:
+    delete:
+      summary: Revoke an API key
+      tags:
+      - API Keys
+      description: Call when a key has leaked or is no longer needed. The key stops working immediately (401 "Invalid or revoked API key" on next use); it is not deleted from history. Requires a session token, not the key being revoked or any other key.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Revoked.
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '403':
+          description: The credential does not carry this right (e.g. an API key managing keys).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: No such agent, key, or persona for this account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: deleteKeysById
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+components:
+  schemas:
+    ApiKey:
+      type: object
+      description: A machine credential. The secret itself (ak_live_…) is shown once, at creation, and never again.
+      required:
+      - id
+      - name
+      - prefix
+      - createdAt
+      - lastUsedAt
+      - revokedAt
+      properties:
+        id:
+          type: string
+          example: key_…
+        name:
+          type: string
+        prefix:
+          type: string
+          example: ak_live_a1b2
+          description: First 12 characters of the secret, kept to recognize it in the list.
+        createdAt:
+          type: string
+          format: date-time
+        lastUsedAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        revokedAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+    ApiError:
+      type: object
+      description: Uniform error body sent by the global error handler for every 4xx/5xx response.
+      required:
+      - error
+      - message
+      properties:
+        error:
+          type: string
+          description: Stable machine code, e.g. BAD_REQUEST, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, CONFLICT, RATE_LIMITED, INVALID_CODE, INTERNAL.
+        message:
+          type: string
+          description: Human-readable reason, safe to show to whoever is driving the agent.
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: An API key `ak_live_…` created on the account page, or a session token from /auth/verify.
+x-refined-from:
+- agentspodium-com-openapi.json
+- agentspodium-com-openapi.yml

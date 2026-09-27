@@ -1,0 +1,2202 @@
+openapi: 3.2.0
+info:
+  title: Agentspodium Com Agents API
+  version: 1.0.0
+  description: 'Operations tagged Agents across 2 of this provider''s published API definitions: agentspodium-com-openapi.json, agentspodium-com-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://agentspodium.com/api
+security:
+- bearerAuth: []
+tags:
+- name: Agents
+  description: Create, configure, and operate a pod.
+paths:
+  /agents:
+    get:
+      summary: List every agent (pod) owned by this account
+      tags:
+      - Agents
+      description: Call to enumerate your fleet, e.g. to find an id before acting on it.
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - agents
+                properties:
+                  agents:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Agent'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: getAgents
+      x-operation-id-source: derived
+    post:
+      summary: Create a new agent (deploy a pod)
+      tags:
+      - Agents
+      description: 'Call once to provision a pod. The call is synchronous and returns once the pod exists, typically within one to two minutes — the engine inside may need a few more seconds, which GET /agents/{id}/liveness tells you. Follow with PATCH /agents/{id}/llm-key: a fresh pod has no model key and answers nothing until one is set.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - personaId
+              - tier
+              properties:
+                personaId:
+                  type: string
+                  minLength: 1
+                  description: Any id from GET /personas.
+                tier:
+                  type: string
+                  enum:
+                  - tiny
+                  - small
+                  - medium
+                  - large
+                  description: Must satisfy the chosen engine's minTier.
+                name:
+                  type: string
+                  maxLength: 60
+                  description: Up to 60 chars; the pod's hostnames are derived from it.
+                channels:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: string
+                    enum:
+                    - web
+                    - telegram
+                    - discord
+                    - whatsapp
+                    - email
+                  description: Default ["web"].
+                lang:
+                  type: string
+                  enum:
+                  - en
+                  - ru
+                skills:
+                  type: array
+                  items:
+                    type: string
+                extraSoul:
+                  type: string
+                  maxLength: 4000
+                  description: Owner instructions appended to the persona's SOUL.
+                soul:
+                  type: string
+                  maxLength: 10000
+                domain:
+                  type: string
+                  maxLength: 253
+                  description: Your own hostname, e.g. agent.example.com. Names under agentspodium.com are assigned automatically and refused here.
+                tools:
+                  type: object
+                  properties:
+                    enabled:
+                      type: array
+                      items:
+                        type: string
+                    mcpServers:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/McpServerConfig'
+                engine:
+                  type: string
+                  enum:
+                  - hermes
+                  - openclaw
+                  - n8n
+                  - claude-code
+                  - opencode
+                  - pi
+                  description: Default hermes.
+                model:
+                  type: string
+                  maxLength: 200
+                webhookUrl:
+                  type: string
+                  maxLength: 500
+                  description: Public http(s) URL to POST pod events to. The signing secret comes back once as `webhookSecret` beside `agent`.
+                app:
+                  allOf:
+                  - $ref: '#/components/schemas/AppConfig'
+                  description: Required when engine is "app". Add repoToken (string) for a private repository; it is stored encrypted and never returned.
+      responses:
+        '200':
+          description: Created — the pod exists and status is "running" (the engine inside may still be booting).
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - agent
+                properties:
+                  agent:
+                    $ref: '#/components/schemas/Agent'
+                  webhookSecret:
+                    type: string
+                    description: 'Only when `webhookUrl` was given: the HMAC secret for verifying deliveries. Shown once.'
+        '400':
+          description: Bad request — the body failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: postAgents
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /agents/{id}:
+    get:
+      summary: Read one agent's full record
+      tags:
+      - Agents
+      description: Call to check current status, endpointUrl, a2a details, quota, and configuration.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - agent
+                properties:
+                  agent:
+                    $ref: '#/components/schemas/Agent'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: No such agent, key, or persona for this account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: getAgentsById
+      x-operation-id-source: derived
+    delete:
+      summary: Delete an agent for good
+      tags:
+      - Agents
+      description: 'Call only when you are certain: this destroys the pod after a final backup and wipes every secret and every line the owner wrote. Export first (GET /agents/{id}/export) if the data might still be needed.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Deleted.
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: No such agent, key, or persona for this account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: deleteAgentsById
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /agents/{id}/upgrade:
+    post:
+      summary: Change an agent's plan
+      tags:
+      - Agents
+      description: Call to move the pod to a different tier; it rebuilds with data migrated. Poll GET /agents/{id} until status is "running" afterward.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - tier
+              properties:
+                tier:
+                  type: string
+                  enum:
+                  - tiny
+                  - small
+                  - medium
+                  - large
+      responses:
+        '200':
+          description: Upgraded — status is "provisioning" while the pod rebuilds.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - agent
+                properties:
+                  agent:
+                    $ref: '#/components/schemas/Agent'
+        '400':
+          description: Bad request — the body failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: No such agent, key, or persona for this account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: postAgentsByIdUpgrade
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /agents/{id}/llm-key:
+    patch:
+      summary: Install, change, or clear the agent's model key
+      tags:
+      - Agents
+      description: 'Call right after creating an agent — without a key it accepts messages and answers nothing. Send `key: null` to clear it. This rebuilds the pod (about a minute); poll liveness again afterward.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - key
+              properties:
+                key:
+                  type: string
+                  minLength: 8
+                  nullable: true
+                  description: The provider's API key; null clears it.
+                provider:
+                  type: string
+                  enum:
+                  - openai
+                  - anthropic
+                  - openrouter
+                  - google
+                  - gemini
+                  - groq
+                  - mistral
+                  - deepseek
+                  - xai
+                  - nous
+                  description: Required together with a non-null key; a key for one vendor and a model from another is a dead pod.
+                model:
+                  type: string
+                  maxLength: 200
+                  nullable: true
+      responses:
+        '200':
+          description: Saved — status is "provisioning" while the pod rebuilds.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - agent
+                properties:
+                  agent:
+                    $ref: '#/components/schemas/Agent'
+        '400':
+          description: Bad request — the body failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: No such agent, key, or persona for this account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: patchAgentsByIdLlmKey
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /agents/{id}/tools:
+    patch:
+      summary: Set the agent's enabled toolsets and MCP servers
+      tags:
+      - Agents
+      description: Call with the full desired set (this replaces, not merges) after checking valid ids via GET /tools. Rebuilds the pod.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                enabled:
+                  type: array
+                  items:
+                    type: string
+                mcpServers:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/McpServerConfig'
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - agent
+                properties:
+                  agent:
+                    $ref: '#/components/schemas/Agent'
+        '400':
+          description: Bad request — the body failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: No such agent, key, or persona for this account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: patchAgentsByIdTools
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /agents/{id}/channels:
+    patch:
+      summary: Set which messengers the agent listens on
+      tags:
+      - Agents
+      description: Call with the full desired channel list (at least one).
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - channels
+              properties:
+                channels:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: string
+                    enum:
+                    - web
+                    - telegram
+                    - discord
+                    - whatsapp
+                    - email
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - agent
+                properties:
+                  agent:
+                    $ref: '#/components/schemas/Agent'
+        '400':
+          description: Bad request — the body failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: No such agent, key, or persona for this account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: patchAgentsByIdChannels
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /agents/{id}/telegram:
+    patch:
+      summary: Install or clear the agent's Telegram bot token
+      tags:
+      - Agents
+      description: 'Call with a bot token from @BotFather to enable the Telegram channel; send `token: null` to clear it. The token is encrypted at rest and never returned by any endpoint.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                  minLength: 20
+                  maxLength: 200
+                  nullable: true
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - agent
+                properties:
+                  agent:
+                    $ref: '#/components/schemas/Agent'
+        '400':
+          description: Bad request — the body failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: No such agent, key, or persona for this account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: patchAgentsByIdTelegram
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /agents/{id}/instructions:
+    patch:
+      summary: Set the owner's extra instructions appended to the persona
+      tags:
+      - Agents
+      description: 'Call to change extraSoul; send `extraSoul: null` to clear it back to the plain persona.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                extraSoul:
+                  type: string
+                  maxLength: 4000
+                  nullable: true
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - agent
+                properties:
+                  agent:
+                    $ref: '#/components/schemas/Agent'
+        '400':
+          description: Bad request — the body failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: No such agent, key, or persona for this account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: patchAgentsByIdInstructions
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /agents/{id}/timezone:
+    patch:
+      summary: Set the IANA timezone the agent's schedules run on
+      tags:
+      - Agents
+      description: 'Call to fix wrong-hour cron jobs and reminders; send `timezone: null` to fall back to the pod''s UTC default. Wrong or missing timezone fails silently — schedules simply fire at the wrong hour.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - timezone
+              properties:
+                timezone:
+                  type: string
+                  maxLength: 64
+                  nullable: true
+                  example: Europe/Berlin
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - agent
+                properties:
+                  agent:
+                    $ref: '#/components/schemas/Agent'
+        '400':
+          description: Bad request — the body failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: No such agent, key, or persona for this account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: patchAgentsByIdTimezone
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /agents/{id}/peers:
+    put:
+      summary: Replace the list of other agents this one may call over A2A
+      tags:
+      - Agents
+      description: 'Call with the full desired peer list (up to 20) — this replaces, not merges. Peer tokens are other people''s secrets: accepted here, encrypted at rest, and never sent back out. Written into the pod on rebuild.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - peers
+              properties:
+                peers:
+                  type: array
+                  maxItems: 20
+                  items:
+                    type: object
+                    required:
+                    - name
+                    - url
+                    properties:
+                      name:
+                        type: string
+                        minLength: 1
+                        maxLength: 64
+                      url:
+                        type: string
+                        format: uri
+                        maxLength: 500
+                      token:
+                        type: string
+                        minLength: 1
+                        maxLength: 500
+                        description: The peer's own bearer credential.
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - agent
+                properties:
+                  agent:
+                    $ref: '#/components/schemas/Agent'
+        '400':
+          description: Bad request — the body failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: No such agent, key, or persona for this account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: putAgentsByIdPeers
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /agents/{id}/listing:
+    patch:
+      summary: Opt an agent into (or out of) the public A2A catalog
+      tags:
+      - Agents
+      description: 'Call with `listed: true` to make this pod discoverable at GET /a2a-catalog (name, url, agent card — never the token); `false` to remove it. Off by default — enabling the a2a toolset is not consent to being listed.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                listed:
+                  type: boolean
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - agent
+                properties:
+                  agent:
+                    $ref: '#/components/schemas/Agent'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: No such agent, key, or persona for this account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: patchAgentsByIdListing
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /agents/{id}/pause:
+    post:
+      summary: Pause an agent (stop billing its resources)
+      tags:
+      - Agents
+      description: Call to stop a pod without losing its data; resume later with POST /agents/{id}/resume.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Paused — status is "stopped".
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - agent
+                properties:
+                  agent:
+                    $ref: '#/components/schemas/Agent'
+        '400':
+          description: Bad request — the body failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: No such agent, key, or persona for this account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: postAgentsByIdPause
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /agents/{id}/resume:
+    post:
+      summary: Resume a paused agent
+      tags:
+      - Agents
+      description: Call to bring a stopped pod back; poll GET /agents/{id}/liveness afterward.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Resumed — status is "running".
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - agent
+                properties:
+                  agent:
+                    $ref: '#/components/schemas/Agent'
+        '400':
+          description: Bad request — the body failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: No such agent, key, or persona for this account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: postAgentsByIdResume
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /agents/{id}/rebuild:
+    post:
+      summary: Rebuild the pod from its last backup
+      tags:
+      - Agents
+      description: Call when liveness shows reachable but not serving for more than a few minutes, or after status is "failed". Poll GET /agents/{id} until "running", then liveness.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Rebuild started — status is "provisioning".
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - agent
+                properties:
+                  agent:
+                    $ref: '#/components/schemas/Agent'
+        '400':
+          description: Bad request — the body failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: No such agent, key, or persona for this account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: postAgentsByIdRebuild
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /agents/{id}/liveness:
+    get:
+      summary: Check whether the pod is up and the engine inside is answering
+      tags:
+      - Agents
+      description: Poll every 5 seconds after create, upgrade, an llm-key change, or a rebuild, until `serving` is true. `reachable && !serving` for more than a few minutes means broken — call POST /agents/{id}/rebuild.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Liveness'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: No such agent, key, or persona for this account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: getAgentsByIdLiveness
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /agents/{id}/usage:
+    get:
+      summary: Read the agent's current RAM/disk usage against its plan
+      tags:
+      - Agents
+      description: Call to check whether an agent is close to being auto-paused for exceeding its tier (quotaStatus reaches "paused"). Numbers refresh about once a minute from the cluster.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - usage
+                - status
+                properties:
+                  usage:
+                    anyOf:
+                    - $ref: '#/components/schemas/AgentQuota'
+                    - type: 'null'
+                  status:
+                    type: string
+                    enum:
+                    - ok
+                    - warn
+                    - grace
+                    - paused
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: No such agent, key, or persona for this account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: getAgentsByIdUsage
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /agents/{id}/term:
+    get:
+      summary: Find out when this agent's current free or paid term ends
+      tags:
+      - Agents
+      description: Call to decide whether to renew soon — the same numbers the account page's countdown uses. `renewUrl` is where a human pays.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - term
+                properties:
+                  term:
+                    $ref: '#/components/schemas/AgentTerm'
+        '400':
+          description: Term information is not available on this deployment.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: No such agent, key, or persona for this account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: getAgentsByIdTerm
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /agents/{id}/export:
+    get:
+      summary: Download a tarball of the agent's own data
+      tags:
+      - Agents
+      description: Call any time, free, to get a portable copy of the pod's persona, skills, and memory before deleting or migrating it. Streams `application/gzip`.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      responses:
+        '200':
+          description: A gzip tar stream.
+          content:
+            application/gzip:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Agent is not deployed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: No such agent, key, or persona for this account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: getAgentsByIdExport
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /agents/{id}/backup:
+    post:
+      summary: Take an off-pod snapshot right now
+      tags:
+      - Agents
+      description: Call before a risky change if you do not want to wait for the daily automatic backup.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Backed up.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - backup
+                properties:
+                  backup:
+                    type: object
+                    required:
+                    - file
+                    - size
+                    properties:
+                      file:
+                        type: string
+                      size:
+                        type: integer
+        '400':
+          description: Agent is not deployed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: No such agent, key, or persona for this account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: postAgentsByIdBackup
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /agents/{id}/backups:
+    get:
+      summary: List server-side snapshots for this agent
+      tags:
+      - Agents
+      description: Call to see what is available to restore from; snapshots are kept 7 days, one taken daily.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - backups
+                properties:
+                  backups:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BackupEntry'
+        '400':
+          description: Agent is not deployed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: No such agent, key, or persona for this account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: getAgentsByIdBackups
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /agents/{id}/memory:
+    get:
+      summary: Inspect what a Hermes agent currently remembers
+      tags:
+      - Agents
+      description: Call read-only to see the pod's soul, installed skills, saved memories, and session count.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - memory
+                properties:
+                  memory:
+                    $ref: '#/components/schemas/AgentMemory'
+        '400':
+          description: Agent is not deployed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: No such agent, key, or persona for this account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: getAgentsByIdMemory
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /domains/check:
+    get:
+      summary: Check what a customer's own domain currently answers
+      tags:
+      - Agents
+      description: Call as the owner types their domain to confirm DNS points at the platform (and, once it does, that HTTPS works) before setting it as an agent's `domain`.
+      parameters:
+      - name: domain
+        in: query
+        required: true
+        schema:
+          type: string
+          maxLength: 253
+      - name: https
+        in: query
+        required: false
+        description: '"1" or "true" to also probe HTTPS (only when DNS already resolves here).'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DomainCheck'
+        '400':
+          description: Bad request — the body failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: getDomainsCheck
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /agents/{id}/webhook:
+    put:
+      summary: Set the URL that receives signed events about this agent's pod
+      tags:
+      - Agents
+      description: 'Call once instead of polling: agent.running, agent.stopped, agent.failed, agent.deleted, payment.confirmed, deletion.warning are POSTed there with an HMAC signature. Replacing the URL issues a new secret; the secret is returned only by this call. Private and loopback hosts are refused.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - url
+              properties:
+                url:
+                  type: string
+                  example: https://ops.example.com/hooks/agentspodium
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - agent
+                - webhook
+                properties:
+                  agent:
+                    $ref: '#/components/schemas/Agent'
+                  webhook:
+                    type: object
+                    required:
+                    - url
+                    - secret
+                    - events
+                    properties:
+                      url:
+                        type: string
+                      secret:
+                        type: string
+                        description: HMAC-SHA256 key for `X-AgentsPodium-Signature`. Shown once.
+                      events:
+                        type: array
+                        items:
+                          type: string
+        '400':
+          description: 'Bad URL: not absolute http(s), carries credentials, or points at a private host.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Not your agent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: putAgentsByIdWebhook
+      x-operation-id-source: derived
+    delete:
+      summary: Stop sending events for this agent
+      tags:
+      - Agents
+      description: Removes the URL and the secret; nothing else changes.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - agent
+                properties:
+                  agent:
+                    $ref: '#/components/schemas/Agent'
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Not your agent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: deleteAgentsByIdWebhook
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /agents/{id}/webhook/test:
+    post:
+      summary: Deliver a `test` event to the webhook right now and report how it went
+      tags:
+      - Agents
+      description: Call after setting the URL to prove the receiver answers 2xx and your signature check passes. Runs all retries before answering, so it can take up to a couple of minutes when the receiver is down.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Delivered or not; see `delivery.ok`.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - delivery
+                properties:
+                  delivery:
+                    $ref: '#/components/schemas/WebhookDelivery'
+        '400':
+          description: No webhook set on this agent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Not your agent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: postAgentsByIdWebhookTest
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /agents/{id}/app:
+    patch:
+      summary: Change what an app instance builds and how it starts
+      tags:
+      - Agents
+      description: Call to point the instance at another branch, fix a build command, or replace the private-repository token. The pod reads this at start, so the change takes effect on the next POST /agents/{id}/rebuild.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/AppConfig'
+              description: Any subset of the fields; repoToken may be sent to replace it or null to remove it.
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - agent
+                - applied
+                properties:
+                  agent:
+                    $ref: '#/components/schemas/Agent'
+                  applied:
+                    type: string
+                    example: on the next rebuild
+        '400':
+          description: Bad configuration, or the instance is not an app.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Not your agent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: patchAgentsByIdApp
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /agents/{id}/build:
+    get:
+      summary: Find out how the last build of an app instance went
+      tags:
+      - Agents
+      description: 'Call after creating or rebuilding an app: the pod can be alive and still serving the previous version while a new build fails. `logTail` carries the reason.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - build
+                properties:
+                  build:
+                    $ref: '#/components/schemas/BuildStatus'
+        '400':
+          description: The instance is not an app.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Not your agent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: getAgentsByIdBuild
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+components:
+  schemas:
+    AgentTerm:
+      type: object
+      description: The one answer to when this agent's current term ends.
+      required:
+      - mode
+      - stopsAt
+      - deletesAt
+      - paidTill
+      - paidProvider
+      - renewUrl
+      properties:
+        mode:
+          type: string
+          enum:
+          - trial
+          - grace
+          - paid
+          - internal
+        stopsAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: When a free agent's pod is paused (trial/grace only).
+        deletesAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: When a free agent is deleted for good (trial/grace only).
+        paidTill:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: End of the current paid period (paid only).
+        paidProvider:
+          type:
+          - string
+          - 'null'
+        renewUrl:
+          type: string
+          format: uri
+          description: Where a human pays to renew this agent.
+    A2aPeerPublic:
+      type: object
+      description: Another A2A agent this one may call by name. The peer's bearer token is write-only and never serialized back.
+      required:
+      - name
+      - url
+      properties:
+        name:
+          type: string
+        url:
+          type: string
+          format: uri
+    AgentQuota:
+      type: object
+      description: Latest RAM/disk snapshot for a pod, refreshed about once a minute from the cluster.
+      required:
+      - memoryUsedBytes
+      - memoryLimitBytes
+      - memoryPct
+      - diskUsedBytes
+      - diskTotalBytes
+      - diskPct
+      - status
+      - updatedAt
+      properties:
+        memoryUsedBytes:
+          type:
+          - integer
+          - 'null'
+        memoryLimitBytes:
+          type:
+          - integer
+          - 'null'
+        memoryPct:
+          type:
+          - number
+          - 'null'
+          description: memoryUsedBytes / memoryLimitBytes, or null when either side is unknown.
+        diskUsedBytes:
+          type:
+          - integer
+          - 'null'
+        diskTotalBytes:
+          type:
+          - integer
+          - 'null'
+        diskPct:
+          type:
+          - number
+          - 'null'
+        status:
+          type: string
+          enum:
+          - ok
+          - warn
+          - grace
+          - paused
+          description: paused means the pod was auto-stopped for exceeding its plan.
+        updatedAt:
+          type: string
+          format: date-time
+    BuildStatus:
+      type: object
+      required:
+      - state
+      properties:
+        state:
+          type: string
+          enum:
+          - building
+          - ok
+          - failed
+          - unknown
+        commit:
+          type: string
+          nullable: true
+        startedAt:
+          type: string
+          format: date-time
+          nullable: true
+        finishedAt:
+          type: string
+          format: date-time
+          nullable: true
+        logTail:
+          type: string
+          nullable: true
+          description: Last lines of the build log.
+    AgentMemory:
+      type: object
+      description: Read-only view of a Hermes agent's persona data.
+      required:
+      - soul
+      - skills
+      - memories
+      - sessionsCount
+      properties:
+        soul:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        memories:
+          type: array
+          items:
+            type: object
+            required:
+            - name
+            - content
+            properties:
+              name:
+                type: string
+              content:
+                type: string
+        sessionsCount:
+          type: integer
+    BackupEntry:
+      type: object
+      required:
+      - name
+      - size
+      - createdAt
+      properties:
+        name:
+          type: string
+        size:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+    Agent:
+      type: object
+      description: One pod. Serialized with the engine encryption key and the plaintext-adjacent LLM key ciphertext stripped; every other stored field is returned as is.
+      required:
+      - id
+      - userId
+      - personaId
+      - name
+      - tier
+      - channels
+      - createdAt
+      - status
+      - dseq
+      - endpointUrl
+      - llmKeyHash
+      - dashUsername
+      - dashPassword
+      - quotaStatus
+      - quota
+      - lang
+      - domain
+      - tools
+      - llmProvider
+      - lastBackupAt
+      - model
+      - engine
+      - timezone
+      - a2aToken
+      - a2aUrl
+      - extraSoul
+      - a2aPeers
+      - a2aSlug
+      - trialNoticeDay
+      - telegramTokenEnc
+      - a2aListed
+      properties:
+        id:
+          type: string
+          example: agt_…
+        userId:
+          type: string
+        personaId:
+          type: string
+        name:
+          type: string
+        tier:
+          type: string
+          enum:
+          - tiny
+          - small
+          - medium
+          - large
+        channels:
+          type: array
+          items:
+            type: string
+            enum:
+            - web
+            - telegram
+            - discord
+            - whatsapp
+            - email
+        createdAt:
+          type: string
+          format: date-time
+          description: The free trial is counted from here.
+        status:
+          type: string
+          enum:
+          - provisioning
+          - running
+          - stopped
+          - failed
+          - deleted
+        dseq:
+          type:
+          - string
+          - 'null'
+          description: Akash deployment sequence (the pod's namespace), set after a successful deploy.
+        endpointUrl:
+          type:
+          - string
+          - 'null'
+          format: uri
+          description: The engine's own public URL/dashboard.
+        llmKeyHash:
+          type:
+          - string
+          - 'null'
+          description: sha256 of the configured LLM key; set once a key is installed.
+        dashUsername:
+          type:
+          - string
+          - 'null'
+          description: Login for the engine's own dashboard, when the engine has one.
+        dashPassword:
+          type:
+          - string
+          - 'null'
+        quotaStatus:
+          type: string
+          enum:
+          - ok
+          - warn
+          - grace
+          - paused
+        quota:
+          anyOf:
+          - $ref: '#/components/schemas/AgentQuota'
+          - type: 'null'
+        lang:
+          type: string
+          enum:
+          - en
+          - ru
+          description: Propagated into the persona's SOUL.
+        domain:
+          type:
+          - string
+          - 'null'
+          description: The customer's own hostname if set, otherwise null (the pod still answers at <a2aSlug>.agentspodium.com).
+        tools:
+          anyOf:
+          - $ref: '#/components/schemas/AgentTools'
+          - type: 'null'
+        llmProvider:
+          type:
+          - string
+          - 'null'
+          enum:
+          - openai
+          - anthropic
+          - openrouter
+          - google
+          - gemini
+          - groq
+          - mistral
+          - deepseek
+          - xai
+          - nous
+          - null
+        lastBackupAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        model:
+          type:
+          - string
+          - 'null'
+          description: Model catalog id, e.g. anthropic:claude-sonnet-4-5.
+        engine:
+          type: string
+          enum:
+          - hermes
+          - openclaw
+          - n8n
+          - claude-code
+          - opencode
+          - pi
+        timezone:
+          type:
+          - string
+          - 'null'
+          description: IANA zone, e.g. Europe/Berlin. Null means the pod's UTC default.
+        a2aToken:
+          type:
+          - string
+          - 'null'
+          description: Bearer peers must send to this agent's A2A endpoint. Null when the a2a toolset is off.
+        a2aUrl:
+          type:
+          - string
+          - 'null'
+          format: uri
+        extraSoul:
+          type:
+          - string
+          - 'null'
+          description: The owner's own additions appended to the persona's SOUL.
+        a2aPeers:
+          anyOf:
+          - type: array
+            items:
+              $ref: '#/components/schemas/A2aPeerPublic'
+          - type: 'null'
+        a2aSlug:
+          type:
+          - string
+          - 'null'
+          description: Stable label every one of this agent's hostnames is built from.
+        trialNoticeDay:
+          type:
+          - integer
+          - 'null'
+          description: 'Which trial reminder has already gone out: 3, 2, 1, or 0 for paused.'
+        telegramTokenEnc:
+          type:
+          - string
+          - 'null'
+          description: '"set" when a Telegram bot token is stored for this agent, otherwise null. The token itself never leaves the server.'
+        a2aListed:
+          type: boolean
+          description: Whether the owner opted into the public A2A catalog (GET /a2a-catalog).
+        webhookUrl:
+          type: string
+          nullable: true
+          description: Receiver for pod events, or null. Set with PUT /agents/{id}/webhook or `webhookUrl` on create.
+        webhookLastStatus:
+          type: string
+          nullable: true
+          description: 'Outcome of the latest delivery: the HTTP status (`200`) or `error: …`.'
+        webhookLastAt:
+          type: string
+          format: date-time
+          nullable: true
+        webhookLastEvent:
+          type: string
+          nullable: true
+          description: Type of the latest delivered event.
+        app:
+          allOf:
+          - $ref: '#/components/schemas/AppConfig'
+          nullable: true
+          description: Set only when engine is "app".
+        appRepoTokenEnc:
+          type: string
+          nullable: true
+          enum:
+          - set
+          - null
+          description: '"set" when a private-repository token is stored; the token itself never leaves the server.'
+    ApiError:
+      type: object
+      description: Uniform error body sent by the global error handler for every 4xx/5xx response.
+      required:
+      - error
+      - message
+      properties:
+        error:
+          type: string
+          description: Stable machine code, e.g. BAD_REQUEST, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, CONFLICT, RATE_LIMITED, INVALID_CODE, INTERNAL.
+        message:
+          type: string
+          description: Human-readable reason, safe to show to whoever is driving the agent.
+    AgentTools:
+      type: object
+      description: Enabled Hermes toolsets and user-defined MCP servers.
+      required:
+      - enabled
+      - mcpServers
+      properties:
+        enabled:
+          type: array
+          items:
+            type: string
+          description: Toolset ids from GET /tools; empty means the safe minimal set.
+        mcpServers:
+          type: array
+          items:
+            $ref: '#/components/schemas/McpServerConfig'
+    McpServerConfig:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          type: string
+          description: Unique server name; used as the server:tool prefix in Hermes.
+        command:
+          type: string
+          description: 'Stdio transport: executable to spawn.'
+        args:
+          type: array
+          items:
+            type: string
+        env:
+          type: object
+          additionalProperties:
+            type: string
+        url:
+          type: string
+          format: uri
+          description: 'HTTP transport: MCP endpoint URL.'
+        headers:
+          type: object
+          additionalProperties:
+            type: string
+    DomainCheck:
+      type: object
+      required:
+      - domain
+      - expectedIp
+      - dns
+      - https
+      properties:
+        domain:
+          type: string
+        expectedIp:
+          type: string
+          description: The address the customer's A record has to carry.
+        dns:
+          type: object
+          required:
+          - status
+          - addresses
+          properties:
+            status:
+              type: string
+              enum:
+              - ok
+              - unresolved
+              - elsewhere
+            addresses:
+              type: array
+              items:
+                type: string
+        https:
+          type: object
+          required:
+          - status
+          properties:
+            status:
+              type: string
+              enum:
+              - ok
+              - error
+              - skipped
+              description: skipped when DNS does not point here yet, or when the caller did not ask for the HTTPS probe.
+    AppConfig:
+      type: object
+      description: 'Build and run configuration for engine "app": a customer repository served as frontend plus backend on one pod.'
+      required:
+      - repo
+      - branch
+      - appPort
+      - apiPrefix
+      properties:
+        repo:
+          type: string
+          example: https://github.com/owner/project
+          description: Public https git URL. Private repositories need repoToken on create.
+        branch:
+          type: string
+          default: main
+        runtime:
+          type: string
+          nullable: true
+          enum:
+          - node
+          - python
+          - go
+          - static
+          - docker
+          - null
+          description: Omit and the pod detects it from the repository.
+        buildCommand:
+          type: string
+          nullable: true
+          example: npm ci && npm run build
+        outputDir:
+          type: string
+          nullable: true
+          example: dist
+          description: Static output, relative to rootDir; null means no static half.
+        startCommand:
+          type: string
+          nullable: true
+          example: node server.js
+          description: Backend process; null means a static-only app.
+        appPort:
+          type: integer
+          default: 3000
+          description: Port the backend listens on inside the pod.
+        apiPrefix:
+          type: string
+          default: /api
+          description: Paths routed to the backend; everything else is served from outputDir.
+        env:
+          type: object
+          additionalProperties:
+            type: string
+          description: Environment variables for the app. Not for secrets.
+        rootDir:
+          type: string
+          nullable: true
+          example: app
+          description: Directory inside the repository where the build runs. For a monorepo whose app is not at the root. Netlify calls this "base".
+        repoUser:
+          type: string
+          nullable: true
+          description: 'Username paired with repoToken when the host wants one. Left out, we use what the host expects: x-access-token for GitHub, oauth2 for GitLab, the token alone for Gitea and Forgejo.'
+    WebhookDelivery:
+      type: object
+      required:
+      - ok
+      - status
+      - attempts
+      properties:
+        ok:
+          type: boolean
+        status:
+          type: integer
+          nullable: true
+          description: HTTP status of the last attempt, or null when the receiver was unreachable.
+        attempts:
+          type: integer
+        error:
+          type: string
+    Liveness:
+      type: object
+      required:
+      - reachable
+      - serving
+      properties:
+        reachable:
+          type:
+          - boolean
+          - 'null'
+          description: The cluster says the pod exists and is ready. Null when there is no address yet.
+        serving:
+          type:
+          - boolean
+          - 'null'
+          description: An HTTP request to the pod's address returned something below 5xx. Null when the connection itself failed.
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: An API key `ak_live_…` created on the account page, or a session token from /auth/verify.
+x-refined-from:
+- agentspodium-com-openapi.json
+- agentspodium-com-openapi.yml

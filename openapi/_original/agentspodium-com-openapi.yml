@@ -1,3 +1,5 @@
+# x-archived-from: agentspodium-com-openapi.yml
+# x-archived-on: 2026-09-26
 # Verbatim conversion of https://hosting.defispace.com/openapi.json (fetched 2026-09-19; server Last-Modified Sun, 13 Sep 2026 19:31:55 GMT).
 # JSON original preserved at openapi/_original/agentspodium-com-openapi.json. Content unchanged; YAML serialisation only.
 openapi: 3.1.0

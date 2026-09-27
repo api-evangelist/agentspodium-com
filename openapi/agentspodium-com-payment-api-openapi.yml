@@ -1,0 +1,749 @@
+openapi: 3.2.0
+info:
+  title: Agentspodium Com Payment API
+  version: 1.0.0
+  description: 'Operations tagged Payment across 2 of this provider''s published API definitions: agentspodium-com-openapi.json, agentspodium-com-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://agentspodium.com/api
+security:
+- bearerAuth: []
+tags:
+- name: Payment
+  description: Subscriptions and payment providers.
+paths:
+  /subscriptions:
+    get:
+      summary: List this account's subscriptions across all agents
+      tags:
+      - Payment
+      description: Call to check payment status and currentPeriodEnd ("paid till") for every agent at once.
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - subscriptions
+                properties:
+                  subscriptions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Subscription'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: getSubscriptions
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /subscriptions/providers:
+    get:
+      summary: List available (and coming-soon) payment providers
+      tags:
+      - Payment
+      description: Call before POST /agents/{id}/activate to find `providers[].buyUrls[tier]` (where to buy a licence) and its `note`.
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - providers
+                - soon
+                properties:
+                  providers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PaymentProvider'
+                  soon:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PaymentProvider'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: getSubscriptionsProviders
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /agents/{id}/activate:
+    post:
+      summary: Activate a paid subscription for an agent with a license key
+      tags:
+      - Payment
+      description: Call after a human buys a plan on a provider (e.g. Gumroad) and receives a license key. Verifies the key and opens an active subscription, stopping the trial clock and resuming a paused pod.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - licenseKey
+              properties:
+                provider:
+                  type: string
+                  description: Defaults to the first configured provider.
+                licenseKey:
+                  type: string
+                  minLength: 1
+      responses:
+        '200':
+          description: Activated.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - subscription
+                properties:
+                  subscription:
+                    $ref: '#/components/schemas/Subscription'
+        '400':
+          description: Bad request — the body failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: No such agent, key, or persona for this account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: postAgentsByIdActivate
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /crypto/info:
+    get:
+      summary: Read crypto payment configuration and supported assets
+      tags:
+      - Payment
+      description: 'Call before POST /agents/{id}/crypto-order to confirm crypto payments are enabled and which assets are accepted. Status: beta testing — the order → confirmation → activation pattern is verified through card payments, the crypto path itself is still being tested.'
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CryptoInfo'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: getCryptoInfo
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /agents/{id}/crypto-order:
+    post:
+      summary: Open a USDT/USDC deposit order for an agent's plan
+      tags:
+      - Payment
+      description: 'Call once to get a deposit address and the exact amount owed, then send the transfer. Create the order before sending anything: the address is shared per account and the order records the balance at that moment as its baseline — a transfer sent earlier pays for nothing. Status: beta testing — verified through card payments, the crypto path itself is still being tested.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - asset
+              properties:
+                asset:
+                  type: string
+                  enum:
+                  - usdt
+                  - usdc
+      responses:
+        '200':
+          description: Order opened.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - order
+                - address
+                - amountDisplay
+                - symbol
+                properties:
+                  order:
+                    type: object
+                    required:
+                    - id
+                    - asset
+                    - amount
+                    - status
+                    properties:
+                      id:
+                        type: string
+                      asset:
+                        type: string
+                        enum:
+                        - usdt
+                        - usdc
+                      amount:
+                        type: string
+                      status:
+                        type: string
+                        enum:
+                        - pending
+                        - paid
+                        - expired
+                  address:
+                    type: string
+                    description: The account's deposit address on Ethereum mainnet.
+                  amountDisplay:
+                    type: string
+                    example: '4.99'
+                  symbol:
+                    type: string
+                    example: USDT
+        '400':
+          description: Bad request — the body failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: No such agent, key, or persona for this account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: postAgentsByIdCryptoOrder
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /agents/{id}/crypto-orders:
+    get:
+      summary: List crypto orders opened for this agent
+      tags:
+      - Payment
+      description: 'Call to poll order status: `pending` → `paid`, usually within minutes of the on-chain transfer confirming. Status: beta testing — verified through card payments, the crypto path itself is still being tested.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - orders
+                properties:
+                  orders:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CryptoOrder'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: No such agent, key, or persona for this account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: getAgentsByIdCryptoOrders
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /stars/info:
+    get:
+      summary: Read Telegram Stars payment configuration
+      tags:
+      - Payment
+      description: 'Call before POST /agents/{id}/stars-order to confirm Stars payments are enabled and get the bot username and star-to-USD rate. Status: beta testing — the card is the proven way for now.'
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StarsInfo'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: getStarsInfo
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /agents/{id}/stars-order:
+    post:
+      summary: Open a Telegram Stars payment order for an agent's plan
+      tags:
+      - Payment
+      description: 'Call to get a t.me deep link; opening it in Telegram sends a Stars invoice for the order''s amount. Status: beta testing — the card is the proven way for now.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Order opened.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - order
+                - botLink
+                properties:
+                  order:
+                    type: object
+                    required:
+                    - id
+                    - amountStars
+                    - status
+                    properties:
+                      id:
+                        type: string
+                      amountStars:
+                        type: integer
+                      status:
+                        type: string
+                        enum:
+                        - pending
+                        - paid
+                        - expired
+                  botLink:
+                    type: string
+                    format: uri
+                    example: https://t.me/SomeBot?start=pay_stx_…
+        '400':
+          description: Bad request — the body failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: No such agent, key, or persona for this account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: postAgentsByIdStarsOrder
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+  /agents/{id}/stars-orders:
+    get:
+      summary: List Telegram Stars orders opened for this agent
+      tags:
+      - Payment
+      description: 'Call to poll order status: `pending` → `paid`. Status: beta testing — the card is the proven way for now.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Agent id (agt_…).
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - orders
+                properties:
+                  orders:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/StarsOrder'
+        '401':
+          description: Missing, invalid, expired, or revoked credential.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: No such agent, key, or persona for this account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      operationId: getAgentsByIdStarsOrders
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+components:
+  schemas:
+    StarsInfo:
+      type: object
+      required:
+      - enabled
+      - botUsername
+      - starUsd
+      properties:
+        enabled:
+          type: boolean
+        botUsername:
+          type: string
+        starUsd:
+          type: number
+          description: USD value of one Telegram Star, used to price orders.
+    StarsOrder:
+      type: object
+      required:
+      - id
+      - userId
+      - agentId
+      - amountStars
+      - status
+      - createdAt
+      - paidAt
+      - tier
+      - priceUsd
+      - tierSnapshot
+      properties:
+        id:
+          type: string
+          example: stx_…
+        userId:
+          type: string
+        agentId:
+          type: string
+        amountStars:
+          type: integer
+        status:
+          type: string
+          enum:
+          - pending
+          - paid
+          - expired
+        createdAt:
+          type: string
+          format: date-time
+        paidAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        tier:
+          anyOf:
+          - type: string
+            enum:
+            - tiny
+            - small
+            - medium
+            - large
+          - type: 'null'
+        priceUsd:
+          type:
+          - number
+          - 'null'
+        tierSnapshot:
+          anyOf:
+          - type: object
+          - type: 'null'
+    ApiError:
+      type: object
+      description: Uniform error body sent by the global error handler for every 4xx/5xx response.
+      required:
+      - error
+      - message
+      properties:
+        error:
+          type: string
+          description: Stable machine code, e.g. BAD_REQUEST, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, CONFLICT, RATE_LIMITED, INVALID_CODE, INTERNAL.
+        message:
+          type: string
+          description: Human-readable reason, safe to show to whoever is driving the agent.
+    CryptoOrder:
+      type: object
+      required:
+      - id
+      - userId
+      - agentId
+      - asset
+      - amount
+      - baseline
+      - status
+      - createdAt
+      - txHash
+      - paidAt
+      - tier
+      - priceUsd
+      - tierSnapshot
+      properties:
+        id:
+          type: string
+          example: cry_…
+        userId:
+          type: string
+        agentId:
+          type: string
+        asset:
+          type: string
+          enum:
+          - usdt
+          - usdc
+        amount:
+          type: string
+          description: Amount owed, in the token's smallest unit (string to avoid float loss).
+        baseline:
+          type: string
+          description: The deposit address's balance at order creation; payment is (balance - baseline) >= amount.
+        status:
+          type: string
+          enum:
+          - pending
+          - paid
+          - expired
+        createdAt:
+          type: string
+          format: date-time
+        txHash:
+          type:
+          - string
+          - 'null'
+        paidAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        tier:
+          anyOf:
+          - type: string
+            enum:
+            - tiny
+            - small
+            - medium
+            - large
+          - type: 'null'
+        priceUsd:
+          type:
+          - number
+          - 'null'
+        tierSnapshot:
+          anyOf:
+          - type: object
+          - type: 'null'
+    Subscription:
+      type: object
+      description: A paid term for one agent. Returned verbatim by GET /subscriptions, including the raw license key used to activate it.
+      required:
+      - id
+      - userId
+      - agentId
+      - tier
+      - period
+      - status
+      - createdAt
+      - priceUsd
+      - currentPeriodEnd
+      - provider
+      - licenseKey
+      - canceledAt
+      - tierSnapshot
+      - expiredAt
+      properties:
+        id:
+          type: string
+          example: sub_…
+        userId:
+          type: string
+        agentId:
+          type: string
+        tier:
+          type: string
+          enum:
+          - tiny
+          - small
+          - medium
+          - large
+        period:
+          type: string
+          enum:
+          - monthly
+          - annual
+        status:
+          type: string
+          enum:
+          - active
+          - canceled
+          - expired
+        createdAt:
+          type: string
+          format: date-time
+        priceUsd:
+          type: number
+        currentPeriodEnd:
+          type: string
+          format: date-time
+          description: '"Paid till" — when this term ends absent a renewal.'
+        provider:
+          type:
+          - string
+          - 'null'
+          description: Payment provider id, e.g. gumroad, usdt, usdc, telegram-stars, internal.
+        licenseKey:
+          type:
+          - string
+          - 'null'
+          description: Raw provider license key, kept so a re-verify can happen later.
+        canceledAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        tierSnapshot:
+          anyOf:
+          - type: object
+            description: The tier's definition frozen at order time, so a later price change never rewrites what this order meant.
+            required:
+            - id
+            - name
+            - spec
+            - monthlyUsd
+            - annualUsd
+            properties:
+              id:
+                type: string
+                enum:
+                - tiny
+                - small
+                - medium
+                - large
+              name:
+                type: string
+              spec:
+                type: string
+              monthlyUsd:
+                type: number
+              annualUsd:
+                type: number
+          - type: 'null'
+        expiredAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: When payment stopped verifying; the grace period is counted from here, not from signup.
+    CryptoInfo:
+      type: object
+      required:
+      - enabled
+      - chainId
+      - assets
+      properties:
+        enabled:
+          type: boolean
+        chainId:
+          type: integer
+          example: 1
+        assets:
+          type: array
+          items:
+            type: object
+            required:
+            - asset
+            - symbol
+            properties:
+              asset:
+                type: string
+                enum:
+                - usdt
+                - usdc
+              symbol:
+                type: string
+    PaymentProvider:
+      type: object
+      required:
+      - id
+      - label
+      properties:
+        id:
+          type: string
+          example: gumroad
+        label:
+          type: string
+        buyUrl:
+          type: string
+          format: uri
+        buyUrls:
+          type: object
+          additionalProperties:
+            type: string
+            format: uri
+          description: Per-tier purchase page, keyed by tier id.
+        note:
+          type: string
+        status:
+          type: string
+          enum:
+          - active
+          - soon
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: An API key `ak_live_…` created on the account page, or a session token from /auth/verify.
+x-refined-from:
+- agentspodium-com-openapi.json
+- agentspodium-com-openapi.yml

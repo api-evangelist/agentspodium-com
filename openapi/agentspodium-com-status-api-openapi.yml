@@ -1,0 +1,71 @@
+openapi: 3.2.0
+info:
+  title: Agentspodium Com Status API
+  version: 1.0.0
+  description: 'Operations tagged Status across 2 of this provider''s published API definitions: agentspodium-com-openapi.json, agentspodium-com-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://agentspodium.com/api
+security:
+- bearerAuth: []
+tags:
+- name: Status
+  description: Platform health.
+paths:
+  /status:
+    get:
+      summary: Check whether the platform itself is healthy
+      tags:
+      - Status
+      description: Call when a request is behaving oddly, to tell "the API is degraded" apart from "my agent/pod is broken" — see also GET /healthz for just the API process.
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - status
+                properties:
+                  status:
+                    type: object
+                    required:
+                    - status
+                    - services
+                    properties:
+                      status:
+                        type: string
+                        enum:
+                        - operational
+                        - degraded
+                      services:
+                        type: object
+                        required:
+                        - account
+                        - deployer
+                        properties:
+                          account:
+                            type: string
+                            enum:
+                            - ok
+                            - down
+                          deployer:
+                            type: string
+                            enum:
+                            - ok
+                            - down
+                            - unknown
+      security: []
+      operationId: getStatus
+      x-operation-id-source: derived
+    servers:
+    - url: https://agentspodium.com/api
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: An API key `ak_live_…` created on the account page, or a session token from /auth/verify.
+x-refined-from:
+- agentspodium-com-openapi.json
+- agentspodium-com-openapi.yml
