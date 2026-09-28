@@ -12,14 +12,14 @@ deployment:
   package: null
   auth: api-key
   verified: probed
-  note: >-
-    Streamable HTTP, stateless (no session id). initialize and tools/list, prompts/list and resources/list all answer
-    anonymously with HTTP 200 (probed 2026-09-19); tools/call requires "Authorization: Bearer ak_live_..." (an x-api-key
-    header or ?apiKey= query parameter are also accepted per the gateway's own 401 body) for every tool except
-    list_platforms, which reads the public engine/tier catalogue. A missing key on an account tool returns
-    {"error":"UNAUTHORIZED","message":"Missing API key. Create one at https://agentspodium.com/account ..."}. GET /mcp is 405;
-    GET / on the host returns a text/markdown description of the gateway. No stdio package is published: the gateway
-    repository's package.json is "private": true and npm search for "agentspodium" returns 0 results.
+  note: 'Streamable HTTP, stateless (no session id). initialize and tools/list, prompts/list and resources/list
+    all answer anonymously with HTTP 200 (probed 2026-09-19); tools/call requires "Authorization: Bearer
+    ak_live_..." (an x-api-key header or ?apiKey= query parameter are also accepted per the gateway''s
+    own 401 body) for every tool except list_platforms, which reads the public engine/tier catalogue.
+    A missing key on an account tool returns {"error":"UNAUTHORIZED","message":"Missing API key. Create
+    one at https://agentspodium.com/account ..."}. GET /mcp is 405; GET / on the host returns a text/markdown
+    description of the gateway. No stdio package is published: the gateway repository''s package.json
+    is "private": true and npm search for "agentspodium" returns 0 results.'
 server:
   name: agentspodium-hosting
   title: AgentsPodium Hosting
@@ -29,138 +29,217 @@ server:
   url: https://mcp.agentspodium.com/mcp
   website: https://hosting.defispace.com/docs/mcp.html
   capabilities:
-    tools: {listChanged: true}
-    prompts: {listChanged: true}
-    resources: {listChanged: true}
-  instructions: >-
-    (verbatim from initialize) AgentsPodium Hosting turns an AgentsPodium account into deployable AI agent pods
-    (instances): pick an engine and hosting tier, deploy one, wire in the customer's own LLM key, and manage its lifecycle
-    and billing. Every tool that touches an account requires an AgentsPodium API key (ak_live_...), created at
-    https://agentspodium.com/account, except list_platforms which reads the public engine/tier catalogue. Recommended
-    order: list_platforms to choose an engine and tier, then create_instance, then poll get_instance_health until serving
-    is true, then set_llm_key so the pod can actually answer, then get_instance_term to check the billing clock. Full docs,
-    including every tool's request/response shape: https://hosting.defispace.com/llms.txt.
+    tools:
+      listChanged: true
+    prompts:
+      listChanged: true
+    resources:
+      listChanged: true
+  instructions: '(verbatim from initialize) AgentsPodium Hosting turns an AgentsPodium account into deployable
+    AI agent pods (instances): pick an engine and hosting tier, deploy one, wire in the customer''s own
+    LLM key, and manage its lifecycle and billing. Every tool that touches an account requires an AgentsPodium
+    API key (ak_live_...), created at https://agentspodium.com/account, except list_platforms which reads
+    the public engine/tier catalogue. Recommended order: list_platforms to choose an engine and tier,
+    then create_instance, then poll get_instance_health until serving is true, then set_llm_key so the
+    pod can actually answer, then get_instance_term to check the billing clock. Full docs, including every
+    tool''s request/response shape: https://hosting.defispace.com/llms.txt.'
 auth:
-  methods: [apikey]
+  methods:
+  - apikey
   apikey:
     header: Authorization
     scheme: Bearer
     prefix: ak_live_
-    alternatives: [x-api-key header, apiKey query parameter]
+    alternatives:
+    - x-api-key header
+    - apiKey query parameter
     issued_at: https://agentspodium.com/account ("API keys for agents"; a signed-in person creates it)
     docs: https://hosting.defispace.com/docs/auth.html
   oauth2: null
   well_known:
     oauth_protected_resource: 404 on mcp.agentspodium.com (probed 2026-09-19)
     oauth_authorization_server: 404 on mcp.agentspodium.com
-    note: No RFC 9728 / RFC 8414 metadata on the MCP host; the key is the only credential. (agentspodium.com does serve an OIDC discovery document for app.agentspodium.com, but that IdP signs owners into pod dashboards, not MCP clients — see authentication/.)
-client_config_example: '{ "mcpServers": { "agentspodium": { "url": "https://mcp.agentspodium.com/mcp", "headers": { "Authorization": "Bearer ak_live_..." } } } }'
-tools_list_file: mcp/agentspodium-com-tools-list.json   # verbatim tools/list response with full inputSchema, outputSchema and annotations
+    note: No RFC 9728 / RFC 8414 metadata on the MCP host; the key is the only credential. (agentspodium.com
+      does serve an OIDC discovery document for app.agentspodium.com, but that IdP signs owners into pod
+      dashboards, not MCP clients — see authentication/.)
+client_config_example: '{ "mcpServers": { "agentspodium": { "url": "https://mcp.agentspodium.com/mcp",
+  "headers": { "Authorization": "Bearer ak_live_..." } } } }'
+tools_list_file: mcp/agentspodium-com-tools-list.json
 tool_count: 13
 tools:
 - name: list_platforms
   title: List platforms and plans
   category: catalog
-  description: List available AgentsPodium engines (platforms) and hosting plans (tiers), with prices and capabilities.
+  description: List available AgentsPodium engines (platforms) and hosting plans (tiers), with prices
+    and capabilities.
   inputs: []
   required: []
-  annotations: {readOnlyHint: true, openWorldHint: true}
+  annotations:
+    readOnlyHint: true
+    openWorldHint: true
   auth: none
-  source_operation: 'openapi/agentspodium-com-openapi.yml#GET /engines + GET /tiers'
+  source_operation: openapi/agentspodium-com-openapi.yml#GET /engines + GET /tiers
 - name: list_instances
   title: List instances
   category: instances
   description: List the caller's AgentsPodium instances (agents); never returns secrets.
   inputs: []
   required: []
-  annotations: {readOnlyHint: true, openWorldHint: true}
-  source_operation: 'openapi/agentspodium-com-openapi.yml#GET /agents'
+  annotations:
+    readOnlyHint: true
+    openWorldHint: true
+  source_operation: openapi/agentspodium-com-openapi.yml#GET /agents
 - name: create_instance
   title: Create instance
   category: instances
-  description: Deploy a new pod; tier required; engine, personaId, name, channels, model, enableA2A, domain, extraSoul, webhookUrl optional. Returns id, addresses and the A2A token.
-  inputs: [personaId, engine, tier, name, channels, model, enableA2A, domain, extraSoul, webhookUrl]
-  required: [tier]
-  annotations: {openWorldHint: true}
-  source_operation: 'openapi/agentspodium-com-openapi.yml#POST /agents'
+  description: Deploy a new pod; tier required; engine, personaId, name, channels, model, enableA2A, domain,
+    extraSoul, webhookUrl optional. Returns id, addresses and the A2A token.
+  inputs:
+  - personaId
+  - engine
+  - tier
+  - name
+  - channels
+  - model
+  - enableA2A
+  - domain
+  - extraSoul
+  - webhookUrl
+  required:
+  - tier
+  annotations:
+    openWorldHint: true
+  source_operation: openapi/agentspodium-com-openapi.yml#POST /agents
 - name: get_instance_health
   title: Check instance health
   category: health
   description: Liveness (reachable, serving), status, quota.
-  inputs: [id]
-  required: [id]
-  annotations: {readOnlyHint: true, openWorldHint: true}
-  source_operation: 'openapi/agentspodium-com-openapi.yml#GET /agents/{id}/liveness + GET /agents/{id}'
+  inputs:
+  - id
+  required:
+  - id
+  annotations:
+    readOnlyHint: true
+    openWorldHint: true
+  source_operation: openapi/agentspodium-com-openapi.yml#GET /agents/{id}/liveness + GET /agents/{id}
 - name: get_instance_term
   title: Get billing term
   category: billing
   description: Trial / grace / paid, stop and delete dates, paid till.
-  inputs: [id]
-  required: [id]
-  annotations: {readOnlyHint: true, openWorldHint: true}
-  source_operation: 'openapi/agentspodium-com-openapi.yml#GET /agents/{id}/term'
+  inputs:
+  - id
+  required:
+  - id
+  annotations:
+    readOnlyHint: true
+    openWorldHint: true
+  source_operation: openapi/agentspodium-com-openapi.yml#GET /agents/{id}/term
 - name: set_llm_key
   title: Set LLM key
   category: instances
   description: Install the customer's model key (provider, key, model); rebuilds the pod.
-  inputs: [id, provider, key, model]
-  required: [id, provider, key]
-  annotations: {idempotentHint: true, openWorldHint: true}
-  source_operation: 'openapi/agentspodium-com-openapi.yml#PATCH /agents/{id}/llm-key'
+  inputs:
+  - id
+  - provider
+  - key
+  - model
+  required:
+  - id
+  - provider
+  - key
+  annotations:
+    idempotentHint: true
+    openWorldHint: true
+  source_operation: openapi/agentspodium-com-openapi.yml#PATCH /agents/{id}/llm-key
 - name: pause_instance
   title: Pause instance
   category: lifecycle
-  inputs: [id]
-  required: [id]
-  annotations: {idempotentHint: true, openWorldHint: true}
-  source_operation: 'openapi/agentspodium-com-openapi.yml#POST /agents/{id}/pause'
+  inputs:
+  - id
+  required:
+  - id
+  annotations:
+    idempotentHint: true
+    openWorldHint: true
+  source_operation: openapi/agentspodium-com-openapi.yml#POST /agents/{id}/pause
+  description: 'Pause an instance: stops it and its billing lease. Data is archived, not deleted.'
 - name: resume_instance
   title: Resume instance
   category: lifecycle
-  inputs: [id]
-  required: [id]
-  annotations: {idempotentHint: true, openWorldHint: true}
-  source_operation: 'openapi/agentspodium-com-openapi.yml#POST /agents/{id}/resume'
+  inputs:
+  - id
+  required:
+  - id
+  annotations:
+    idempotentHint: true
+    openWorldHint: true
+  source_operation: openapi/agentspodium-com-openapi.yml#POST /agents/{id}/resume
+  description: Resume a previously paused instance, rebuilding it from its archive.
 - name: rebuild_instance
   title: Rebuild instance
   category: lifecycle
   description: Fresh pod from the last backup.
-  inputs: [id]
-  required: [id]
-  annotations: {destructiveHint: true, openWorldHint: true}
-  source_operation: 'openapi/agentspodium-com-openapi.yml#POST /agents/{id}/rebuild'
+  inputs:
+  - id
+  required:
+  - id
+  annotations:
+    destructiveHint: true
+    openWorldHint: true
+  source_operation: openapi/agentspodium-com-openapi.yml#POST /agents/{id}/rebuild
 - name: delete_instance
   title: Delete instance
   category: lifecycle
   description: Destroys the pod after a final backup.
-  inputs: [id]
-  required: [id]
-  annotations: {destructiveHint: true, openWorldHint: true}
-  source_operation: 'openapi/agentspodium-com-openapi.yml#DELETE /agents/{id}'
+  inputs:
+  - id
+  required:
+  - id
+  annotations:
+    destructiveHint: true
+    openWorldHint: true
+  source_operation: openapi/agentspodium-com-openapi.yml#DELETE /agents/{id}
 - name: get_payment_options
   title: Get payment options
   category: billing
   description: Buy links per plan, crypto and Telegram Stars info (beta), and the term.
-  inputs: [id]
-  required: [id]
-  annotations: {readOnlyHint: true, openWorldHint: true}
-  source_operation: 'openapi/agentspodium-com-openapi.yml#GET /subscriptions/providers + GET /crypto/info + GET /stars/info + GET /agents/{id}/term'
+  inputs:
+  - id
+  required:
+  - id
+  annotations:
+    readOnlyHint: true
+    openWorldHint: true
+  source_operation: openapi/agentspodium-com-openapi.yml#GET /subscriptions/providers + GET /crypto/info
+    + GET /stars/info + GET /agents/{id}/term
 - name: set_peers
   title: Set A2A peers
   category: a2a
   description: Agents this pod may call.
-  inputs: [id, peers]
-  required: [id, peers]
-  annotations: {idempotentHint: true, openWorldHint: true}
-  source_operation: 'openapi/agentspodium-com-openapi.yml#PUT /agents/{id}/peers'
+  inputs:
+  - id
+  - peers
+  required:
+  - id
+  - peers
+  annotations:
+    idempotentHint: true
+    openWorldHint: true
+  source_operation: openapi/agentspodium-com-openapi.yml#PUT /agents/{id}/peers
 - name: set_webhook
   title: Set event webhook
   category: webhooks
   description: URL for signed pod events instead of polling.
-  inputs: [id, url]
-  required: [id, url]
-  annotations: {idempotentHint: true, openWorldHint: true}
-  source_operation: 'openapi/agentspodium-com-openapi.yml#PUT /agents/{id}/webhook'
+  inputs:
+  - id
+  - url
+  required:
+  - id
+  - url
+  annotations:
+    idempotentHint: true
+    openWorldHint: true
+  source_operation: openapi/agentspodium-com-openapi.yml#PUT /agents/{id}/webhook
 prompts:
 - name: deploy-checklist
   description: Step-by-step checklist to deploy an AI agent pod on AgentsPodium and make it answer.
@@ -170,14 +249,43 @@ resources:
   name: agentspodium-docs
   description: AgentsPodium hosting docs (llms.txt), cached for 10 minutes.
   mimeType: text/plain
-errors: Errors from the account API come back as tool results with isError true and the API's { error, message } body (docs/mcp.md).
+errors: Errors from the account API come back as tool results with isError true and the API's { error,
+  message } body (docs/mcp.md).
 x-evidence:
   fetched: '2026-09-19'
   probes:
-  - {method: POST, url: 'https://mcp.agentspodium.com/mcp', body: 'initialize (protocolVersion 2025-06-18)', http_status: 200, note: 'serverInfo agentspodium-hosting 1.0.4; capabilities tools/prompts/resources'}
-  - {method: POST, url: 'https://mcp.agentspodium.com/mcp', body: 'tools/list', http_status: 200, note: '13 tools with inputSchema, outputSchema, annotations, execution.taskSupport forbidden — saved verbatim'}
-  - {method: POST, url: 'https://mcp.agentspodium.com/mcp', body: 'prompts/list', http_status: 200, note: '1 prompt'}
-  - {method: POST, url: 'https://mcp.agentspodium.com/mcp', body: 'resources/list', http_status: 200, note: '1 resource'}
-  - {method: POST, url: 'https://mcp.agentspodium.com/mcp', body: 'tools/call list_instances (no key)', http_status: 200, note: 'body {"error":"UNAUTHORIZED",...} — account tools are key-gated as documented'}
-  - {method: GET, url: 'https://mcp.agentspodium.com/mcp', http_status: 405}
-  - {method: GET, url: 'https://mcp.agentspodium.com/', http_status: 200, note: 'text/markdown gateway description naming the 13 tools'}
+  - method: POST
+    url: https://mcp.agentspodium.com/mcp
+    body: initialize (protocolVersion 2025-06-18)
+    http_status: 200
+    note: serverInfo agentspodium-hosting 1.0.4; capabilities tools/prompts/resources
+  - method: POST
+    url: https://mcp.agentspodium.com/mcp
+    body: tools/list
+    http_status: 200
+    note: 13 tools with inputSchema, outputSchema, annotations, execution.taskSupport forbidden — saved
+      verbatim
+  - method: POST
+    url: https://mcp.agentspodium.com/mcp
+    body: prompts/list
+    http_status: 200
+    note: 1 prompt
+  - method: POST
+    url: https://mcp.agentspodium.com/mcp
+    body: resources/list
+    http_status: 200
+    note: 1 resource
+  - method: POST
+    url: https://mcp.agentspodium.com/mcp
+    body: tools/call list_instances (no key)
+    http_status: 200
+    note: body {"error":"UNAUTHORIZED",...} — account tools are key-gated as documented
+  - method: GET
+    url: https://mcp.agentspodium.com/mcp
+    http_status: 405
+  - method: GET
+    url: https://mcp.agentspodium.com/
+    http_status: 200
+    note: text/markdown gateway description naming the 13 tools
+descriptions_source: live tools/list (authorship probe or saved capture); filled by backfill-tools-from-authorship.py
+  --descriptions, 2026-09-28
