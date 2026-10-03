@@ -1,8 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Agentspodium Com Payment API
+  title: AgentsPodium account API (agent-facing subset) Payment API
   version: 1.0.0
-  description: 'Operations tagged Payment across 2 of this provider''s published API definitions: agentspodium-com-openapi.json, agentspodium-com-openapi.yml. Each path carries the servers of the definition it was published in.'
+  description: 'Create, configure, pay for and watch AI agent pods, meant to be driven directly by an agent. This document covers the subset an agent (rather than a human operator) needs: auth, agent lifecycle, tools/models/personas catalog, payment, A2A directory. See https://hosting.defispace.com/docs/quickstart.md for a narrative walkthrough.'
 servers:
 - url: https://agentspodium.com/api
 security:
@@ -39,8 +39,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: getSubscriptions
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /subscriptions/providers:
     get:
       summary: List available (and coming-soon) payment providers
@@ -74,8 +72,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: getSubscriptionsProviders
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /agents/{id}/activate:
     post:
       summary: Activate a paid subscription for an agent with a license key
@@ -136,8 +132,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: postAgentsByIdActivate
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /crypto/info:
     get:
       summary: Read crypto payment configuration and supported assets
@@ -159,8 +153,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: getCryptoInfo
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /agents/{id}/crypto-order:
     post:
       summary: Open a USDT/USDC deposit order for an agent's plan
@@ -253,8 +245,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: postAgentsByIdCryptoOrder
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /agents/{id}/crypto-orders:
     get:
       summary: List crypto orders opened for this agent
@@ -296,8 +286,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: getAgentsByIdCryptoOrders
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /stars/info:
     get:
       summary: Read Telegram Stars payment configuration
@@ -319,8 +307,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: getStarsInfo
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /agents/{id}/stars-order:
     post:
       summary: Open a Telegram Stars payment order for an agent's plan
@@ -386,8 +372,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: postAgentsByIdStarsOrder
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /agents/{id}/stars-orders:
     get:
       summary: List Telegram Stars orders opened for this agent
@@ -429,78 +413,35 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: getAgentsByIdStarsOrders
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
 components:
   schemas:
-    StarsInfo:
+    CryptoInfo:
       type: object
       required:
       - enabled
-      - botUsername
-      - starUsd
+      - chainId
+      - assets
       properties:
         enabled:
           type: boolean
-        botUsername:
-          type: string
-        starUsd:
-          type: number
-          description: USD value of one Telegram Star, used to price orders.
-    StarsOrder:
-      type: object
-      required:
-      - id
-      - userId
-      - agentId
-      - amountStars
-      - status
-      - createdAt
-      - paidAt
-      - tier
-      - priceUsd
-      - tierSnapshot
-      properties:
-        id:
-          type: string
-          example: stx_…
-        userId:
-          type: string
-        agentId:
-          type: string
-        amountStars:
+        chainId:
           type: integer
-        status:
-          type: string
-          enum:
-          - pending
-          - paid
-          - expired
-        createdAt:
-          type: string
-          format: date-time
-        paidAt:
-          type:
-          - string
-          - 'null'
-          format: date-time
-        tier:
-          anyOf:
-          - type: string
-            enum:
-            - tiny
-            - small
-            - medium
-            - large
-          - type: 'null'
-        priceUsd:
-          type:
-          - number
-          - 'null'
-        tierSnapshot:
-          anyOf:
-          - type: object
-          - type: 'null'
+          example: 1
+        assets:
+          type: array
+          items:
+            type: object
+            required:
+            - asset
+            - symbol
+            properties:
+              asset:
+                type: string
+                enum:
+                - usdt
+                - usdc
+              symbol:
+                type: string
     ApiError:
       type: object
       description: Uniform error body sent by the global error handler for every 4xx/5xx response.
@@ -514,76 +455,6 @@ components:
         message:
           type: string
           description: Human-readable reason, safe to show to whoever is driving the agent.
-    CryptoOrder:
-      type: object
-      required:
-      - id
-      - userId
-      - agentId
-      - asset
-      - amount
-      - baseline
-      - status
-      - createdAt
-      - txHash
-      - paidAt
-      - tier
-      - priceUsd
-      - tierSnapshot
-      properties:
-        id:
-          type: string
-          example: cry_…
-        userId:
-          type: string
-        agentId:
-          type: string
-        asset:
-          type: string
-          enum:
-          - usdt
-          - usdc
-        amount:
-          type: string
-          description: Amount owed, in the token's smallest unit (string to avoid float loss).
-        baseline:
-          type: string
-          description: The deposit address's balance at order creation; payment is (balance - baseline) >= amount.
-        status:
-          type: string
-          enum:
-          - pending
-          - paid
-          - expired
-        createdAt:
-          type: string
-          format: date-time
-        txHash:
-          type:
-          - string
-          - 'null'
-        paidAt:
-          type:
-          - string
-          - 'null'
-          format: date-time
-        tier:
-          anyOf:
-          - type: string
-            enum:
-            - tiny
-            - small
-            - medium
-            - large
-          - type: 'null'
-        priceUsd:
-          type:
-          - number
-          - 'null'
-        tierSnapshot:
-          anyOf:
-          - type: object
-          - type: 'null'
     Subscription:
       type: object
       description: A paid term for one agent. Returned verbatim by GET /subscriptions, including the raw license key used to activate it.
@@ -685,33 +556,6 @@ components:
           - 'null'
           format: date-time
           description: When payment stopped verifying; the grace period is counted from here, not from signup.
-    CryptoInfo:
-      type: object
-      required:
-      - enabled
-      - chainId
-      - assets
-      properties:
-        enabled:
-          type: boolean
-        chainId:
-          type: integer
-          example: 1
-        assets:
-          type: array
-          items:
-            type: object
-            required:
-            - asset
-            - symbol
-            properties:
-              asset:
-                type: string
-                enum:
-                - usdt
-                - usdc
-              symbol:
-                type: string
     PaymentProvider:
       type: object
       required:
@@ -739,11 +583,146 @@ components:
           enum:
           - active
           - soon
+    StarsOrder:
+      type: object
+      required:
+      - id
+      - userId
+      - agentId
+      - amountStars
+      - status
+      - createdAt
+      - paidAt
+      - tier
+      - priceUsd
+      - tierSnapshot
+      properties:
+        id:
+          type: string
+          example: stx_…
+        userId:
+          type: string
+        agentId:
+          type: string
+        amountStars:
+          type: integer
+        status:
+          type: string
+          enum:
+          - pending
+          - paid
+          - expired
+        createdAt:
+          type: string
+          format: date-time
+        paidAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        tier:
+          anyOf:
+          - type: string
+            enum:
+            - tiny
+            - small
+            - medium
+            - large
+          - type: 'null'
+        priceUsd:
+          type:
+          - number
+          - 'null'
+        tierSnapshot:
+          anyOf:
+          - type: object
+          - type: 'null'
+    StarsInfo:
+      type: object
+      required:
+      - enabled
+      - botUsername
+      - starUsd
+      properties:
+        enabled:
+          type: boolean
+        botUsername:
+          type: string
+        starUsd:
+          type: number
+          description: USD value of one Telegram Star, used to price orders.
+    CryptoOrder:
+      type: object
+      required:
+      - id
+      - userId
+      - agentId
+      - asset
+      - amount
+      - baseline
+      - status
+      - createdAt
+      - txHash
+      - paidAt
+      - tier
+      - priceUsd
+      - tierSnapshot
+      properties:
+        id:
+          type: string
+          example: cry_…
+        userId:
+          type: string
+        agentId:
+          type: string
+        asset:
+          type: string
+          enum:
+          - usdt
+          - usdc
+        amount:
+          type: string
+          description: Amount owed, in the token's smallest unit (string to avoid float loss).
+        baseline:
+          type: string
+          description: The deposit address's balance at order creation; payment is (balance - baseline) >= amount.
+        status:
+          type: string
+          enum:
+          - pending
+          - paid
+          - expired
+        createdAt:
+          type: string
+          format: date-time
+        txHash:
+          type:
+          - string
+          - 'null'
+        paidAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        tier:
+          anyOf:
+          - type: string
+            enum:
+            - tiny
+            - small
+            - medium
+            - large
+          - type: 'null'
+        priceUsd:
+          type:
+          - number
+          - 'null'
+        tierSnapshot:
+          anyOf:
+          - type: object
+          - type: 'null'
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       description: An API key `ak_live_…` created on the account page, or a session token from /auth/verify.
-x-refined-from:
-- agentspodium-com-openapi.json
-- agentspodium-com-openapi.yml

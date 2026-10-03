@@ -1,8 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Agentspodium Com Agents API
+  title: AgentsPodium account API (agent-facing subset) Agents API
   version: 1.0.0
-  description: 'Operations tagged Agents across 2 of this provider''s published API definitions: agentspodium-com-openapi.json, agentspodium-com-openapi.yml. Each path carries the servers of the definition it was published in.'
+  description: 'Create, configure, pay for and watch AI agent pods, meant to be driven directly by an agent. This document covers the subset an agent (rather than a human operator) needs: auth, agent lifecycle, tools/models/personas catalog, payment, A2A directory. See https://hosting.defispace.com/docs/quickstart.md for a narrative walkthrough.'
 servers:
 - url: https://agentspodium.com/api
 security:
@@ -163,8 +163,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: postAgents
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /agents/{id}:
     get:
       summary: Read one agent's full record
@@ -233,8 +231,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: deleteAgentsById
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /agents/{id}/upgrade:
     post:
       summary: Change an agent's plan
@@ -296,8 +292,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: postAgentsByIdUpgrade
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /agents/{id}/llm-key:
     patch:
       summary: Install, change, or clear the agent's model key
@@ -375,8 +369,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: patchAgentsByIdLlmKey
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /agents/{id}/tools:
     patch:
       summary: Set the agent's enabled toolsets and MCP servers
@@ -437,8 +429,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: patchAgentsByIdTools
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /agents/{id}/channels:
     patch:
       summary: Set which messengers the agent listens on
@@ -504,8 +494,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: patchAgentsByIdChannels
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /agents/{id}/telegram:
     patch:
       summary: Install or clear the agent's Telegram bot token
@@ -563,8 +551,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: patchAgentsByIdTelegram
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /agents/{id}/instructions:
     patch:
       summary: Set the owner's extra instructions appended to the persona
@@ -621,8 +607,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: patchAgentsByIdInstructions
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /agents/{id}/timezone:
     patch:
       summary: Set the IANA timezone the agent's schedules run on
@@ -682,8 +666,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: patchAgentsByIdTimezone
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /agents/{id}/peers:
     put:
       summary: Replace the list of other agents this one may call over A2A
@@ -760,8 +742,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: putAgentsByIdPeers
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /agents/{id}/listing:
     patch:
       summary: Opt an agent into (or out of) the public A2A catalog
@@ -810,8 +790,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: patchAgentsByIdListing
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /agents/{id}/pause:
     post:
       summary: Pause an agent (stop billing its resources)
@@ -857,8 +835,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: postAgentsByIdPause
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /agents/{id}/resume:
     post:
       summary: Resume a paused agent
@@ -904,8 +880,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: postAgentsByIdResume
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /agents/{id}/rebuild:
     post:
       summary: Rebuild the pod from its last backup
@@ -951,8 +925,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: postAgentsByIdRebuild
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /agents/{id}/liveness:
     get:
       summary: Check whether the pod is up and the engine inside is answering
@@ -987,8 +959,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: getAgentsByIdLiveness
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /agents/{id}/usage:
     get:
       summary: Read the agent's current RAM/disk usage against its plan
@@ -1038,8 +1008,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: getAgentsByIdUsage
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /agents/{id}/term:
     get:
       summary: Find out when this agent's current free or paid term ends
@@ -1085,8 +1053,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: getAgentsByIdTerm
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /agents/{id}/export:
     get:
       summary: Download a tarball of the agent's own data
@@ -1128,8 +1094,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: getAgentsByIdExport
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /agents/{id}/backup:
     post:
       summary: Take an off-pod snapshot right now
@@ -1183,8 +1147,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: postAgentsByIdBackup
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /agents/{id}/backups:
     get:
       summary: List server-side snapshots for this agent
@@ -1232,8 +1194,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: getAgentsByIdBackups
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /agents/{id}/memory:
     get:
       summary: Inspect what a Hermes agent currently remembers
@@ -1279,8 +1239,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: getAgentsByIdMemory
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /domains/check:
     get:
       summary: Check what a customer's own domain currently answers
@@ -1321,8 +1279,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: getDomainsCheck
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /agents/{id}/webhook:
     put:
       summary: Set the URL that receives signed events about this agent's pod
@@ -1435,8 +1391,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: deleteAgentsByIdWebhook
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /agents/{id}/webhook/test:
     post:
       summary: Deliver a `test` event to the webhook right now and report how it went
@@ -1482,8 +1436,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: postAgentsByIdWebhookTest
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /agents/{id}/app:
     patch:
       summary: Change what an app instance builds and how it starts
@@ -1541,8 +1493,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: patchAgentsByIdApp
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /agents/{id}/build:
     get:
       summary: Find out how the last build of an app instance went
@@ -1588,66 +1538,71 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       operationId: getAgentsByIdBuild
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
 components:
   schemas:
-    AgentTerm:
+    AppConfig:
       type: object
-      description: The one answer to when this agent's current term ends.
+      description: 'Build and run configuration for engine "app": a customer repository served as frontend plus backend on one pod.'
       required:
-      - mode
-      - stopsAt
-      - deletesAt
-      - paidTill
-      - paidProvider
-      - renewUrl
+      - repo
+      - branch
+      - appPort
+      - apiPrefix
       properties:
-        mode:
+        repo:
           type: string
+          example: https://github.com/owner/project
+          description: Public https git URL. Private repositories need repoToken on create.
+        branch:
+          type: string
+          default: main
+        runtime:
+          type: string
+          nullable: true
           enum:
-          - trial
-          - grace
-          - paid
-          - internal
-        stopsAt:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          description: When a free agent's pod is paused (trial/grace only).
-        deletesAt:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          description: When a free agent is deleted for good (trial/grace only).
-        paidTill:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          description: End of the current paid period (paid only).
-        paidProvider:
-          type:
-          - string
-          - 'null'
-        renewUrl:
+          - node
+          - python
+          - go
+          - static
+          - docker
+          - null
+          description: Omit and the pod detects it from the repository.
+        buildCommand:
           type: string
-          format: uri
-          description: Where a human pays to renew this agent.
-    A2aPeerPublic:
-      type: object
-      description: Another A2A agent this one may call by name. The peer's bearer token is write-only and never serialized back.
-      required:
-      - name
-      - url
-      properties:
-        name:
+          nullable: true
+          example: npm ci && npm run build
+        outputDir:
           type: string
-        url:
+          nullable: true
+          example: dist
+          description: Static output, relative to rootDir; null means no static half.
+        startCommand:
           type: string
-          format: uri
+          nullable: true
+          example: node server.js
+          description: Backend process; null means a static-only app.
+        appPort:
+          type: integer
+          default: 3000
+          description: Port the backend listens on inside the pod.
+        apiPrefix:
+          type: string
+          default: /api
+          description: Paths routed to the backend; everything else is served from outputDir.
+        env:
+          type: object
+          additionalProperties:
+            type: string
+          description: Environment variables for the app. Not for secrets.
+        rootDir:
+          type: string
+          nullable: true
+          example: app
+          description: Directory inside the repository where the build runs. For a monorepo whose app is not at the root. Netlify calls this "base".
+        repoUser:
+          type: string
+          nullable: true
+          description: 'Username paired with repoToken when the host wants one. Left out, we use what the host expects: x-access-token for GitHub, oauth2 for GitLab, the token alone for Gitea and Forgejo.'
     AgentQuota:
       type: object
       description: Latest RAM/disk snapshot for a pod, refreshed about once a minute from the cluster.
@@ -1697,62 +1652,6 @@ components:
         updatedAt:
           type: string
           format: date-time
-    BuildStatus:
-      type: object
-      required:
-      - state
-      properties:
-        state:
-          type: string
-          enum:
-          - building
-          - ok
-          - failed
-          - unknown
-        commit:
-          type: string
-          nullable: true
-        startedAt:
-          type: string
-          format: date-time
-          nullable: true
-        finishedAt:
-          type: string
-          format: date-time
-          nullable: true
-        logTail:
-          type: string
-          nullable: true
-          description: Last lines of the build log.
-    AgentMemory:
-      type: object
-      description: Read-only view of a Hermes agent's persona data.
-      required:
-      - soul
-      - skills
-      - memories
-      - sessionsCount
-      properties:
-        soul:
-          type: string
-        skills:
-          type: array
-          items:
-            type: string
-        memories:
-          type: array
-          items:
-            type: object
-            required:
-            - name
-            - content
-            properties:
-              name:
-                type: string
-              content:
-                type: string
-        sessionsCount:
-          type: integer
     BackupEntry:
       type: object
       required:
@@ -2012,49 +1911,33 @@ components:
         message:
           type: string
           description: Human-readable reason, safe to show to whoever is driving the agent.
-    AgentTools:
-      type: object
-      description: Enabled Hermes toolsets and user-defined MCP servers.
-      required:
-      - enabled
-      - mcpServers
-      properties:
-        enabled:
-          type: array
-          items:
-            type: string
-          description: Toolset ids from GET /tools; empty means the safe minimal set.
-        mcpServers:
-          type: array
-          items:
-            $ref: '#/components/schemas/McpServerConfig'
-    McpServerConfig:
+    BuildStatus:
       type: object
       required:
-      - name
+      - state
       properties:
-        name:
+        state:
           type: string
-          description: Unique server name; used as the server:tool prefix in Hermes.
-        command:
+          enum:
+          - building
+          - ok
+          - failed
+          - unknown
+        commit:
           type: string
-          description: 'Stdio transport: executable to spawn.'
-        args:
-          type: array
-          items:
-            type: string
-        env:
-          type: object
-          additionalProperties:
-            type: string
-        url:
+          nullable: true
+        startedAt:
           type: string
-          format: uri
-          description: 'HTTP transport: MCP endpoint URL.'
-        headers:
-          type: object
-          additionalProperties:
-            type: string
+          format: date-time
+          nullable: true
+        finishedAt:
+          type: string
+          format: date-time
+          nullable: true
+        logTail:
+          type: string
+          nullable: true
+          description: Last lines of the build log.
     DomainCheck:
       type: object
       required:
@@ -2096,69 +1979,22 @@ components:
               - error
               - skipped
               description: skipped when DNS does not point here yet, or when the caller did not ask for the HTTPS probe.
-    AppConfig:
+    Liveness:
       type: object
-      description: 'Build and run configuration for engine "app": a customer repository served as frontend plus backend on one pod.'
       required:
-      - repo
-      - branch
-      - appPort
-      - apiPrefix
+      - reachable
+      - serving
       properties:
-        repo:
-          type: string
-          example: https://github.com/owner/project
-          description: Public https git URL. Private repositories need repoToken on create.
-        branch:
-          type: string
-          default: main
-        runtime:
-          type: string
-          nullable: true
-          enum:
-          - node
-          - python
-          - go
-          - static
-          - docker
-          - null
-          description: Omit and the pod detects it from the repository.
-        buildCommand:
-          type: string
-          nullable: true
-          example: npm ci && npm run build
-        outputDir:
-          type: string
-          nullable: true
-          example: dist
-          description: Static output, relative to rootDir; null means no static half.
-        startCommand:
-          type: string
-          nullable: true
-          example: node server.js
-          description: Backend process; null means a static-only app.
-        appPort:
-          type: integer
-          default: 3000
-          description: Port the backend listens on inside the pod.
-        apiPrefix:
-          type: string
-          default: /api
-          description: Paths routed to the backend; everything else is served from outputDir.
-        env:
-          type: object
-          additionalProperties:
-            type: string
-          description: Environment variables for the app. Not for secrets.
-        rootDir:
-          type: string
-          nullable: true
-          example: app
-          description: Directory inside the repository where the build runs. For a monorepo whose app is not at the root. Netlify calls this "base".
-        repoUser:
-          type: string
-          nullable: true
-          description: 'Username paired with repoToken when the host wants one. Left out, we use what the host expects: x-access-token for GitHub, oauth2 for GitLab, the token alone for Gitea and Forgejo.'
+        reachable:
+          type:
+          - boolean
+          - 'null'
+          description: The cluster says the pod exists and is ready. Null when there is no address yet.
+        serving:
+          type:
+          - boolean
+          - 'null'
+          description: An HTTP request to the pod's address returned something below 5xx. Null when the connection itself failed.
     WebhookDelivery:
       type: object
       required:
@@ -2176,27 +2012,136 @@ components:
           type: integer
         error:
           type: string
-    Liveness:
+    AgentTerm:
+      type: object
+      description: The one answer to when this agent's current term ends.
+      required:
+      - mode
+      - stopsAt
+      - deletesAt
+      - paidTill
+      - paidProvider
+      - renewUrl
+      properties:
+        mode:
+          type: string
+          enum:
+          - trial
+          - grace
+          - paid
+          - internal
+        stopsAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: When a free agent's pod is paused (trial/grace only).
+        deletesAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: When a free agent is deleted for good (trial/grace only).
+        paidTill:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: End of the current paid period (paid only).
+        paidProvider:
+          type:
+          - string
+          - 'null'
+        renewUrl:
+          type: string
+          format: uri
+          description: Where a human pays to renew this agent.
+    A2aPeerPublic:
+      type: object
+      description: Another A2A agent this one may call by name. The peer's bearer token is write-only and never serialized back.
+      required:
+      - name
+      - url
+      properties:
+        name:
+          type: string
+        url:
+          type: string
+          format: uri
+    AgentTools:
+      type: object
+      description: Enabled Hermes toolsets and user-defined MCP servers.
+      required:
+      - enabled
+      - mcpServers
+      properties:
+        enabled:
+          type: array
+          items:
+            type: string
+          description: Toolset ids from GET /tools; empty means the safe minimal set.
+        mcpServers:
+          type: array
+          items:
+            $ref: '#/components/schemas/McpServerConfig'
+    AgentMemory:
+      type: object
+      description: Read-only view of a Hermes agent's persona data.
+      required:
+      - soul
+      - skills
+      - memories
+      - sessionsCount
+      properties:
+        soul:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        memories:
+          type: array
+          items:
+            type: object
+            required:
+            - name
+            - content
+            properties:
+              name:
+                type: string
+              content:
+                type: string
+        sessionsCount:
+          type: integer
+    McpServerConfig:
       type: object
       required:
-      - reachable
-      - serving
+      - name
       properties:
-        reachable:
-          type:
-          - boolean
-          - 'null'
-          description: The cluster says the pod exists and is ready. Null when there is no address yet.
-        serving:
-          type:
-          - boolean
-          - 'null'
-          description: An HTTP request to the pod's address returned something below 5xx. Null when the connection itself failed.
+        name:
+          type: string
+          description: Unique server name; used as the server:tool prefix in Hermes.
+        command:
+          type: string
+          description: 'Stdio transport: executable to spawn.'
+        args:
+          type: array
+          items:
+            type: string
+        env:
+          type: object
+          additionalProperties:
+            type: string
+        url:
+          type: string
+          format: uri
+          description: 'HTTP transport: MCP endpoint URL.'
+        headers:
+          type: object
+          additionalProperties:
+            type: string
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       description: An API key `ak_live_…` created on the account page, or a session token from /auth/verify.
-x-refined-from:
-- agentspodium-com-openapi.json
-- agentspodium-com-openapi.yml

@@ -1,8 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Agentspodium Com Catalog API
+  title: AgentsPodium account API (agent-facing subset) Catalog API
   version: 1.0.0
-  description: 'Operations tagged Catalog across 2 of this provider''s published API definitions: agentspodium-com-openapi.json, agentspodium-com-openapi.yml. Each path carries the servers of the definition it was published in.'
+  description: 'Create, configure, pay for and watch AI agent pods, meant to be driven directly by an agent. This document covers the subset an agent (rather than a human operator) needs: auth, agent lifecycle, tools/models/personas catalog, payment, A2A directory. See https://hosting.defispace.com/docs/quickstart.md for a narrative walkthrough.'
 servers:
 - url: https://agentspodium.com/api
 security:
@@ -34,8 +34,6 @@ paths:
       security: []
       operationId: getPersonas
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /personas/{id}:
     get:
       summary: Read one persona's full catalog entry
@@ -81,8 +79,6 @@ paths:
       security: []
       operationId: getPersonasById
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /tiers:
     get:
       summary: List the pricing plans and the trial length
@@ -119,8 +115,6 @@ paths:
       security: []
       operationId: getTiers
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /engines:
     get:
       summary: List the platforms (engines) that can be deployed
@@ -150,8 +144,6 @@ paths:
       security: []
       operationId: getEngines
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /tools:
     get:
       summary: List Hermes toolsets available to enable on an agent
@@ -199,8 +191,6 @@ paths:
       security: []
       operationId: getTools
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /models:
     get:
       summary: List the curated LLM model catalog
@@ -227,8 +217,6 @@ paths:
       security: []
       operationId: getModels
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
   /llm-providers:
     get:
       summary: List LLM providers Hermes can take a key for
@@ -252,23 +240,8 @@ paths:
       security: []
       operationId: getLlmProviders
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
 components:
   schemas:
-    DemoLine:
-      type: object
-      required:
-      - role
-      - text
-      properties:
-        role:
-          type: string
-          enum:
-          - user
-          - agent
-        text:
-          type: string
     Persona:
       type: object
       description: 'Public catalog entry: a built-in persona, or a community persona once published.'
@@ -390,68 +363,19 @@ components:
           type: array
           items:
             type: string
-    ModelInfo:
+    DemoLine:
       type: object
       required:
-      - id
-      - provider
-      - name
-      - label
-      - costTier
+      - role
+      - text
       properties:
-        id:
-          type: string
-          example: anthropic:claude-sonnet-4-5
-          description: Passed back as `model` on create / PATCH llm-key.
-        provider:
+        role:
           type: string
           enum:
-          - openai
-          - anthropic
-          - openrouter
-          - google
-          - gemini
-          - groq
-          - mistral
-          - deepseek
-          - xai
-          - nous
-        name:
+          - user
+          - agent
+        text:
           type: string
-        label:
-          type: string
-        costTier:
-          type: string
-          enum:
-          - cheap
-          - mid
-          - premium
-    Tier:
-      type: object
-      required:
-      - id
-      - name
-      - spec
-      - monthlyUsd
-      - annualUsd
-      properties:
-        id:
-          type: string
-          enum:
-          - tiny
-          - small
-          - medium
-          - large
-        name:
-          type: string
-        spec:
-          type: string
-          example: 2 GB RAM · 2 vCPU · 6 GB disk
-        monthlyUsd:
-          type: number
-        annualUsd:
-          type: number
-          description: Annual price; two months free versus paying monthly.
     ToolsetInfo:
       type: object
       required:
@@ -482,6 +406,70 @@ components:
         plugin:
           type: string
           description: Set for entries that are Hermes plugins rather than built-in toolsets.
+    PersonaL10n:
+      type: object
+      required:
+      - name
+      - tagline
+      - forWho
+      - does
+      properties:
+        name:
+          type: string
+        tagline:
+          type: string
+        forWho:
+          type: string
+        does:
+          type: array
+          items:
+            type: string
+        disclaimer:
+          type:
+          - string
+          - 'null'
+        doesExamples:
+          type: object
+          additionalProperties:
+            type: string
+        demo:
+          type: array
+          items:
+            $ref: '#/components/schemas/DemoLine'
+    EngineCapabilities:
+      type: object
+      required:
+      - skills
+      - mcp
+      - skillRegistry
+      - skillUninstall
+      - llmKey
+      - model
+      - sso
+      - dashCredentials
+      properties:
+        skills:
+          type: boolean
+        mcp:
+          type: boolean
+        skillRegistry:
+          type: boolean
+          description: Whether the engine can search a skill registry itself.
+        skillUninstall:
+          type: boolean
+        llmKey:
+          type: boolean
+        model:
+          type: boolean
+        llmProviders:
+          type: array
+          items:
+            type: string
+          description: Providers this engine accepts; omitted means every provider AgentsPodium offers.
+        sso:
+          type: boolean
+        dashCredentials:
+          type: boolean
     Engine:
       type: object
       required:
@@ -546,75 +534,70 @@ components:
           type: string
         envVar:
           type: string
-    EngineCapabilities:
+    Tier:
       type: object
       required:
-      - skills
-      - mcp
-      - skillRegistry
-      - skillUninstall
-      - llmKey
-      - model
-      - sso
-      - dashCredentials
-      properties:
-        skills:
-          type: boolean
-        mcp:
-          type: boolean
-        skillRegistry:
-          type: boolean
-          description: Whether the engine can search a skill registry itself.
-        skillUninstall:
-          type: boolean
-        llmKey:
-          type: boolean
-        model:
-          type: boolean
-        llmProviders:
-          type: array
-          items:
-            type: string
-          description: Providers this engine accepts; omitted means every provider AgentsPodium offers.
-        sso:
-          type: boolean
-        dashCredentials:
-          type: boolean
-    PersonaL10n:
-      type: object
-      required:
+      - id
       - name
-      - tagline
-      - forWho
-      - does
+      - spec
+      - monthlyUsd
+      - annualUsd
       properties:
+        id:
+          type: string
+          enum:
+          - tiny
+          - small
+          - medium
+          - large
         name:
           type: string
-        tagline:
+        spec:
           type: string
-        forWho:
+          example: 2 GB RAM · 2 vCPU · 6 GB disk
+        monthlyUsd:
+          type: number
+        annualUsd:
+          type: number
+          description: Annual price; two months free versus paying monthly.
+    ModelInfo:
+      type: object
+      required:
+      - id
+      - provider
+      - name
+      - label
+      - costTier
+      properties:
+        id:
           type: string
-        does:
-          type: array
-          items:
-            type: string
-        disclaimer:
-          type:
-          - string
-          - 'null'
-        doesExamples:
-          type: object
-          additionalProperties:
-            type: string
-        demo:
-          type: array
-          items:
-            $ref: '#/components/schemas/DemoLine'
+          example: anthropic:claude-sonnet-4-5
+          description: Passed back as `model` on create / PATCH llm-key.
+        provider:
+          type: string
+          enum:
+          - openai
+          - anthropic
+          - openrouter
+          - google
+          - gemini
+          - groq
+          - mistral
+          - deepseek
+          - xai
+          - nous
+        name:
+          type: string
+        label:
+          type: string
+        costTier:
+          type: string
+          enum:
+          - cheap
+          - mid
+          - premium
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       description: An API key `ak_live_…` created on the account page, or a session token from /auth/verify.
-x-refined-from:
-- agentspodium-com-openapi.json
-- agentspodium-com-openapi.yml

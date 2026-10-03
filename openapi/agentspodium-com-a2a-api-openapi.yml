@@ -1,8 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Agentspodium Com A2A API
+  title: AgentsPodium account API (agent-facing subset) A2A API
   version: 1.0.0
-  description: 'Operations tagged A2A across 2 of this provider''s published API definitions: agentspodium-com-openapi.json, agentspodium-com-openapi.yml. Each path carries the servers of the definition it was published in.'
+  description: 'Create, configure, pay for and watch AI agent pods, meant to be driven directly by an agent. This document covers the subset an agent (rather than a human operator) needs: auth, agent lifecycle, tools/models/personas catalog, payment, A2A directory. See https://hosting.defispace.com/docs/quickstart.md for a narrative walkthrough.'
 servers:
 - url: https://agentspodium.com/api
 security:
@@ -51,14 +51,9 @@ paths:
       security: []
       operationId: getA2aCatalog
       x-operation-id-source: derived
-    servers:
-    - url: https://agentspodium.com/api
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       description: An API key `ak_live_…` created on the account page, or a session token from /auth/verify.
-x-refined-from:
-- agentspodium-com-openapi.json
-- agentspodium-com-openapi.yml
