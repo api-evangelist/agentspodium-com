@@ -208,6 +208,8 @@ apis:
   humanURL: https://hosting.defispace.com/docs/
   baseURL: https://agentspodium.com/api
   tags:
+  - APIKeys
+  tags_raw:
   - API keys
   properties:
   - type: OpenAPI
@@ -248,6 +250,8 @@ apis:
   humanURL: https://hosting.defispace.com/docs/
   baseURL: https://agentspodium.com/api
   tags:
+  - Authentication
+  tags_raw:
   - Auth
   properties:
   - type: OpenAPI
@@ -328,6 +332,8 @@ apis:
   humanURL: https://hosting.defispace.com/docs/
   baseURL: https://agentspodium.com/api
   tags:
+  - Payments
+  tags_raw:
   - Payment
   properties:
   - type: OpenAPI
@@ -408,6 +414,9 @@ maintainers:
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: CapabilityMap
+  url: capabilities/agentspodium-com-capability-edges.yml
+  name: AgentsPodium Business Capability Map
 - type: DomainSecurity
   url: security/agentspodium-com-domain-security.yml
 - type: Website
