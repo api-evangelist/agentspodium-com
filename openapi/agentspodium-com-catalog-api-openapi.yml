@@ -242,6 +242,68 @@ paths:
       x-operation-id-source: derived
 components:
   schemas:
+    ModelInfo:
+      type: object
+      required:
+      - id
+      - provider
+      - name
+      - label
+      - costTier
+      properties:
+        id:
+          type: string
+          example: anthropic:claude-sonnet-4-5
+          description: Passed back as `model` on create / PATCH llm-key.
+        provider:
+          type: string
+          enum:
+          - openai
+          - anthropic
+          - openrouter
+          - google
+          - gemini
+          - groq
+          - mistral
+          - deepseek
+          - xai
+          - nous
+        name:
+          type: string
+        label:
+          type: string
+        costTier:
+          type: string
+          enum:
+          - cheap
+          - mid
+          - premium
+    Tier:
+      type: object
+      required:
+      - id
+      - name
+      - spec
+      - monthlyUsd
+      - annualUsd
+      properties:
+        id:
+          type: string
+          enum:
+          - tiny
+          - small
+          - medium
+          - large
+        name:
+          type: string
+        spec:
+          type: string
+          example: 2 GB RAM · 2 vCPU · 6 GB disk
+        monthlyUsd:
+          type: number
+        annualUsd:
+          type: number
+          description: Annual price; two months free versus paying monthly.
     Persona:
       type: object
       description: 'Public catalog entry: a built-in persona, or a community persona once published.'
@@ -363,113 +425,6 @@ components:
           type: array
           items:
             type: string
-    DemoLine:
-      type: object
-      required:
-      - role
-      - text
-      properties:
-        role:
-          type: string
-          enum:
-          - user
-          - agent
-        text:
-          type: string
-    ToolsetInfo:
-      type: object
-      required:
-      - id
-      - name
-      - description
-      - defaultEnabled
-      - group
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        description:
-          type: string
-        defaultEnabled:
-          type: boolean
-        group:
-          type: string
-          enum:
-          - web
-          - files
-          - media
-          - voice
-          - thinking
-          - integrations
-          - network
-        plugin:
-          type: string
-          description: Set for entries that are Hermes plugins rather than built-in toolsets.
-    PersonaL10n:
-      type: object
-      required:
-      - name
-      - tagline
-      - forWho
-      - does
-      properties:
-        name:
-          type: string
-        tagline:
-          type: string
-        forWho:
-          type: string
-        does:
-          type: array
-          items:
-            type: string
-        disclaimer:
-          type:
-          - string
-          - 'null'
-        doesExamples:
-          type: object
-          additionalProperties:
-            type: string
-        demo:
-          type: array
-          items:
-            $ref: '#/components/schemas/DemoLine'
-    EngineCapabilities:
-      type: object
-      required:
-      - skills
-      - mcp
-      - skillRegistry
-      - skillUninstall
-      - llmKey
-      - model
-      - sso
-      - dashCredentials
-      properties:
-        skills:
-          type: boolean
-        mcp:
-          type: boolean
-        skillRegistry:
-          type: boolean
-          description: Whether the engine can search a skill registry itself.
-        skillUninstall:
-          type: boolean
-        llmKey:
-          type: boolean
-        model:
-          type: boolean
-        llmProviders:
-          type: array
-          items:
-            type: string
-          description: Providers this engine accepts; omitted means every provider AgentsPodium offers.
-        sso:
-          type: boolean
-        dashCredentials:
-          type: boolean
     Engine:
       type: object
       required:
@@ -510,6 +465,113 @@ components:
           - beta
         capabilities:
           $ref: '#/components/schemas/EngineCapabilities'
+    ToolsetInfo:
+      type: object
+      required:
+      - id
+      - name
+      - description
+      - defaultEnabled
+      - group
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        defaultEnabled:
+          type: boolean
+        group:
+          type: string
+          enum:
+          - web
+          - files
+          - media
+          - voice
+          - thinking
+          - integrations
+          - network
+        plugin:
+          type: string
+          description: Set for entries that are Hermes plugins rather than built-in toolsets.
+    DemoLine:
+      type: object
+      required:
+      - role
+      - text
+      properties:
+        role:
+          type: string
+          enum:
+          - user
+          - agent
+        text:
+          type: string
+    EngineCapabilities:
+      type: object
+      required:
+      - skills
+      - mcp
+      - skillRegistry
+      - skillUninstall
+      - llmKey
+      - model
+      - sso
+      - dashCredentials
+      properties:
+        skills:
+          type: boolean
+        mcp:
+          type: boolean
+        skillRegistry:
+          type: boolean
+          description: Whether the engine can search a skill registry itself.
+        skillUninstall:
+          type: boolean
+        llmKey:
+          type: boolean
+        model:
+          type: boolean
+        llmProviders:
+          type: array
+          items:
+            type: string
+          description: Providers this engine accepts; omitted means every provider AgentsPodium offers.
+        sso:
+          type: boolean
+        dashCredentials:
+          type: boolean
+    PersonaL10n:
+      type: object
+      required:
+      - name
+      - tagline
+      - forWho
+      - does
+      properties:
+        name:
+          type: string
+        tagline:
+          type: string
+        forWho:
+          type: string
+        does:
+          type: array
+          items:
+            type: string
+        disclaimer:
+          type:
+          - string
+          - 'null'
+        doesExamples:
+          type: object
+          additionalProperties:
+            type: string
+        demo:
+          type: array
+          items:
+            $ref: '#/components/schemas/DemoLine'
     LlmProviderInfo:
       type: object
       required:
@@ -534,68 +596,6 @@ components:
           type: string
         envVar:
           type: string
-    Tier:
-      type: object
-      required:
-      - id
-      - name
-      - spec
-      - monthlyUsd
-      - annualUsd
-      properties:
-        id:
-          type: string
-          enum:
-          - tiny
-          - small
-          - medium
-          - large
-        name:
-          type: string
-        spec:
-          type: string
-          example: 2 GB RAM · 2 vCPU · 6 GB disk
-        monthlyUsd:
-          type: number
-        annualUsd:
-          type: number
-          description: Annual price; two months free versus paying monthly.
-    ModelInfo:
-      type: object
-      required:
-      - id
-      - provider
-      - name
-      - label
-      - costTier
-      properties:
-        id:
-          type: string
-          example: anthropic:claude-sonnet-4-5
-          description: Passed back as `model` on create / PATCH llm-key.
-        provider:
-          type: string
-          enum:
-          - openai
-          - anthropic
-          - openrouter
-          - google
-          - gemini
-          - groq
-          - mistral
-          - deepseek
-          - xai
-          - nous
-        name:
-          type: string
-        label:
-          type: string
-        costTier:
-          type: string
-          enum:
-          - cheap
-          - mid
-          - premium
   securitySchemes:
     bearerAuth:
       type: http

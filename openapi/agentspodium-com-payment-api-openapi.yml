@@ -415,6 +415,60 @@ paths:
       x-operation-id-source: derived
 components:
   schemas:
+    StarsOrder:
+      type: object
+      required:
+      - id
+      - userId
+      - agentId
+      - amountStars
+      - status
+      - createdAt
+      - paidAt
+      - tier
+      - priceUsd
+      - tierSnapshot
+      properties:
+        id:
+          type: string
+          example: stx_…
+        userId:
+          type: string
+        agentId:
+          type: string
+        amountStars:
+          type: integer
+        status:
+          type: string
+          enum:
+          - pending
+          - paid
+          - expired
+        createdAt:
+          type: string
+          format: date-time
+        paidAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        tier:
+          anyOf:
+          - type: string
+            enum:
+            - tiny
+            - small
+            - medium
+            - large
+          - type: 'null'
+        priceUsd:
+          type:
+          - number
+          - 'null'
+        tierSnapshot:
+          anyOf:
+          - type: object
+          - type: 'null'
     CryptoInfo:
       type: object
       required:
@@ -556,87 +610,6 @@ components:
           - 'null'
           format: date-time
           description: When payment stopped verifying; the grace period is counted from here, not from signup.
-    PaymentProvider:
-      type: object
-      required:
-      - id
-      - label
-      properties:
-        id:
-          type: string
-          example: gumroad
-        label:
-          type: string
-        buyUrl:
-          type: string
-          format: uri
-        buyUrls:
-          type: object
-          additionalProperties:
-            type: string
-            format: uri
-          description: Per-tier purchase page, keyed by tier id.
-        note:
-          type: string
-        status:
-          type: string
-          enum:
-          - active
-          - soon
-    StarsOrder:
-      type: object
-      required:
-      - id
-      - userId
-      - agentId
-      - amountStars
-      - status
-      - createdAt
-      - paidAt
-      - tier
-      - priceUsd
-      - tierSnapshot
-      properties:
-        id:
-          type: string
-          example: stx_…
-        userId:
-          type: string
-        agentId:
-          type: string
-        amountStars:
-          type: integer
-        status:
-          type: string
-          enum:
-          - pending
-          - paid
-          - expired
-        createdAt:
-          type: string
-          format: date-time
-        paidAt:
-          type:
-          - string
-          - 'null'
-          format: date-time
-        tier:
-          anyOf:
-          - type: string
-            enum:
-            - tiny
-            - small
-            - medium
-            - large
-          - type: 'null'
-        priceUsd:
-          type:
-          - number
-          - 'null'
-        tierSnapshot:
-          anyOf:
-          - type: object
-          - type: 'null'
     StarsInfo:
       type: object
       required:
@@ -721,6 +694,33 @@ components:
           anyOf:
           - type: object
           - type: 'null'
+    PaymentProvider:
+      type: object
+      required:
+      - id
+      - label
+      properties:
+        id:
+          type: string
+          example: gumroad
+        label:
+          type: string
+        buyUrl:
+          type: string
+          format: uri
+        buyUrls:
+          type: object
+          additionalProperties:
+            type: string
+            format: uri
+          description: Per-tier purchase page, keyed by tier id.
+        note:
+          type: string
+        status:
+          type: string
+          enum:
+          - active
+          - soon
   securitySchemes:
     bearerAuth:
       type: http
