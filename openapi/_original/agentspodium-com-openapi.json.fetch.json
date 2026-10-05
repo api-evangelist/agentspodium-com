@@ -1,0 +1,12 @@
+{
+ "url": "https://hosting.defispace.com/openapi.json",
+ "requested_url": "https://hosting.defispace.com/openapi.json",
+ "status": 200,
+ "content_type": "application/json",
+ "bytes": 162590,
+ "sha256": "46b0fc8218221a9a9ab125053b95223458fb26bb4c7afb7677c8da25f2841ae2",
+ "fetched_at": "2026-10-04",
+ "fetched_by": "APIEvangelist-Harvest/1.0 (+https://apievangelist.com)",
+ "match": "byte-identical",
+ "note": "Re-fetched from the provider by verify-openapi-sources.py; the archived file is byte-identical to what the provider serves."
+}
