@@ -70,3 +70,34 @@ x-evidence:
   content_type: application/json; charset=utf-8
   body: '{"tiers":[{"id":"tiny","name":"Tiny","spec":"1 GB RAM · 1 vCPU · 4 GB disk","monthlyUsd":2.49,"annualUsd":24.9},{"id":"small",...,"monthlyUsd":4.99,"annualUsd":49.9},{"id":"medium",...,"monthlyUsd":9.99,"annualUsd":99.9},{"id":"large",...,"monthlyUsd":17.99,"annualUsd":179.9}],"trial":{"days":7,"graceDays":3}}'
   corroborated_by: [https://agentspodium.com/identity.json (four schema.org Offer entries with the same prices), https://hosting.defispace.com/docs/payment.md, https://agentspodium.com/api/engines (minTier per engine)]
+x-canonical:
+  generated: '2026-10-08'
+  vocabulary: all/0-working/economics/plans-canonical.yml
+  models:
+  - hybrid
+  units: []
+  plans:
+  - name: Tiny
+    access: other
+    model: hybrid
+    model_how: derived
+    units: []
+    periods: []
+  - name: Small
+    access: other
+    model: hybrid
+    model_how: derived
+    units: []
+    periods: []
+  - name: Medium
+    access: other
+    model: hybrid
+    model_how: derived
+    units: []
+    periods: []
+  - name: Large
+    access: other
+    model: hybrid
+    model_how: derived
+    units: []
+    periods: []
