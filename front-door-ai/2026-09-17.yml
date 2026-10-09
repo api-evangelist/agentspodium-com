@@ -1,0 +1,32 @@
+# Front Door AI Index — agentspodium-com — 2026-09-17
+# AI vocabulary counted on the provider's root page. Generated; do not edit.
+# `score` is null unless ownership is `own` — see front_door_ai.py.
+front_door_ai:
+  slug: agentspodium-com
+  lexicon_version: '1.0'
+  probed_at: '2026-09-25'
+  host: agentspodium.com
+  final_host: agentspodium.com
+  ownership: own
+  owner: agentspodium-com
+  shares_host_with: null
+  inherited_from: null
+  alias_of: null
+  verdict: scored
+  score: 13
+  band: 5
+  band_label: prominent
+  host_score: 13
+  density: 15.1
+  words: 861
+  tiers:
+    agentic: 4
+    core: 6
+    model: 3
+  ambiguous: 10
+  top_terms:
+    agent: 10
+    AI: 6
+    AI agent: 4
+    Claude: 2
+    ChatGPT: 1
