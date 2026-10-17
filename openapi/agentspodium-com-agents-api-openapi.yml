@@ -1540,20 +1540,183 @@ paths:
       x-operation-id-source: derived
 components:
   schemas:
-    BackupEntry:
+    AppConfig:
+      type: object
+      description: 'Build and run configuration for engine "app": a customer repository served as frontend plus backend on one pod.'
+      required:
+      - repo
+      - branch
+      - appPort
+      - apiPrefix
+      properties:
+        repo:
+          type: string
+          example: https://github.com/owner/project
+          description: Public https git URL. Private repositories need repoToken on create.
+        branch:
+          type: string
+          default: main
+        runtime:
+          type: string
+          nullable: true
+          enum:
+          - node
+          - python
+          - go
+          - static
+          - docker
+          - null
+          description: Omit and the pod detects it from the repository.
+        buildCommand:
+          type: string
+          nullable: true
+          example: npm ci && npm run build
+        outputDir:
+          type: string
+          nullable: true
+          example: dist
+          description: Static output, relative to rootDir; null means no static half.
+        startCommand:
+          type: string
+          nullable: true
+          example: node server.js
+          description: Backend process; null means a static-only app.
+        appPort:
+          type: integer
+          default: 3000
+          description: Port the backend listens on inside the pod.
+        apiPrefix:
+          type: string
+          default: /api
+          description: Paths routed to the backend; everything else is served from outputDir.
+        env:
+          type: object
+          additionalProperties:
+            type: string
+          description: Environment variables for the app. Not for secrets.
+        rootDir:
+          type: string
+          nullable: true
+          example: app
+          description: Directory inside the repository where the build runs. For a monorepo whose app is not at the root. Netlify calls this "base".
+        repoUser:
+          type: string
+          nullable: true
+          description: 'Username paired with repoToken when the host wants one. Left out, we use what the host expects: x-access-token for GitHub, oauth2 for GitLab, the token alone for Gitea and Forgejo.'
+    DomainCheck:
       type: object
       required:
-      - name
-      - size
-      - createdAt
+      - domain
+      - expectedIp
+      - dns
+      - https
       properties:
-        name:
+        domain:
           type: string
-        size:
+        expectedIp:
+          type: string
+          description: The address the customer's A record has to carry.
+        dns:
+          type: object
+          required:
+          - status
+          - addresses
+          properties:
+            status:
+              type: string
+              enum:
+              - ok
+              - unresolved
+              - elsewhere
+            addresses:
+              type: array
+              items:
+                type: string
+        https:
+          type: object
+          required:
+          - status
+          properties:
+            status:
+              type: string
+              enum:
+              - ok
+              - error
+              - skipped
+              description: skipped when DNS does not point here yet, or when the caller did not ask for the HTTPS probe.
+    AgentMemory:
+      type: object
+      description: Read-only view of a Hermes agent's persona data.
+      required:
+      - soul
+      - skills
+      - memories
+      - sessionsCount
+      properties:
+        soul:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        memories:
+          type: array
+          items:
+            type: object
+            required:
+            - name
+            - content
+            properties:
+              name:
+                type: string
+              content:
+                type: string
+        sessionsCount:
           type: integer
-        createdAt:
+    AgentTerm:
+      type: object
+      description: The one answer to when this agent's current term ends.
+      required:
+      - mode
+      - stopsAt
+      - deletesAt
+      - paidTill
+      - paidProvider
+      - renewUrl
+      properties:
+        mode:
           type: string
+          enum:
+          - trial
+          - grace
+          - paid
+          - internal
+        stopsAt:
+          type:
+          - string
+          - 'null'
           format: date-time
+          description: When a free agent's pod is paused (trial/grace only).
+        deletesAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: When a free agent is deleted for good (trial/grace only).
+        paidTill:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: End of the current paid period (paid only).
+        paidProvider:
+          type:
+          - string
+          - 'null'
+        renewUrl:
+          type: string
+          format: uri
+          description: Where a human pays to renew this agent.
     AgentTools:
       type: object
       description: Enabled Hermes toolsets and user-defined MCP servers.
@@ -1570,48 +1733,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/McpServerConfig'
-    A2aPeerPublic:
-      type: object
-      description: Another A2A agent this one may call by name. The peer's bearer token is write-only and never serialized back.
-      required:
-      - name
-      - url
-      properties:
-        name:
-          type: string
-        url:
-          type: string
-          format: uri
-    WebhookDelivery:
-      type: object
-      required:
-      - ok
-      - status
-      - attempts
-      properties:
-        ok:
-          type: boolean
-        status:
-          type: integer
-          nullable: true
-          description: HTTP status of the last attempt, or null when the receiver was unreachable.
-        attempts:
-          type: integer
-        error:
-          type: string
-    ApiError:
-      type: object
-      description: Uniform error body sent by the global error handler for every 4xx/5xx response.
-      required:
-      - error
-      - message
-      properties:
-        error:
-          type: string
-          description: Stable machine code, e.g. BAD_REQUEST, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, CONFLICT, RATE_LIMITED, INVALID_CODE, INTERNAL.
-        message:
-          type: string
-          description: Human-readable reason, safe to show to whoever is driving the agent.
     Agent:
       type: object
       description: One pod. Serialized with the engine encryption key and the plaintext-adjacent LLM key ciphertext stripped; every other stored field is returned as is.
@@ -1844,118 +1965,6 @@ components:
           - set
           - null
           description: '"set" when a private-repository token is stored; the token itself never leaves the server.'
-    DomainCheck:
-      type: object
-      required:
-      - domain
-      - expectedIp
-      - dns
-      - https
-      properties:
-        domain:
-          type: string
-        expectedIp:
-          type: string
-          description: The address the customer's A record has to carry.
-        dns:
-          type: object
-          required:
-          - status
-          - addresses
-          properties:
-            status:
-              type: string
-              enum:
-              - ok
-              - unresolved
-              - elsewhere
-            addresses:
-              type: array
-              items:
-                type: string
-        https:
-          type: object
-          required:
-          - status
-          properties:
-            status:
-              type: string
-              enum:
-              - ok
-              - error
-              - skipped
-              description: skipped when DNS does not point here yet, or when the caller did not ask for the HTTPS probe.
-    BuildStatus:
-      type: object
-      required:
-      - state
-      properties:
-        state:
-          type: string
-          enum:
-          - building
-          - ok
-          - failed
-          - unknown
-        commit:
-          type: string
-          nullable: true
-        startedAt:
-          type: string
-          format: date-time
-          nullable: true
-        finishedAt:
-          type: string
-          format: date-time
-          nullable: true
-        logTail:
-          type: string
-          nullable: true
-          description: Last lines of the build log.
-    AgentTerm:
-      type: object
-      description: The one answer to when this agent's current term ends.
-      required:
-      - mode
-      - stopsAt
-      - deletesAt
-      - paidTill
-      - paidProvider
-      - renewUrl
-      properties:
-        mode:
-          type: string
-          enum:
-          - trial
-          - grace
-          - paid
-          - internal
-        stopsAt:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          description: When a free agent's pod is paused (trial/grace only).
-        deletesAt:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          description: When a free agent is deleted for good (trial/grace only).
-        paidTill:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          description: End of the current paid period (paid only).
-        paidProvider:
-          type:
-          - string
-          - 'null'
-        renewUrl:
-          type: string
-          format: uri
-          description: Where a human pays to renew this agent.
     McpServerConfig:
       type: object
       required:
@@ -1983,69 +1992,105 @@ components:
           type: object
           additionalProperties:
             type: string
-    AppConfig:
+    ApiError:
       type: object
-      description: 'Build and run configuration for engine "app": a customer repository served as frontend plus backend on one pod.'
+      description: Uniform error body sent by the global error handler for every 4xx/5xx response.
       required:
-      - repo
-      - branch
-      - appPort
-      - apiPrefix
+      - error
+      - message
       properties:
-        repo:
+        error:
           type: string
-          example: https://github.com/owner/project
-          description: Public https git URL. Private repositories need repoToken on create.
-        branch:
+          description: Stable machine code, e.g. BAD_REQUEST, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, CONFLICT, RATE_LIMITED, INVALID_CODE, INTERNAL.
+        message:
           type: string
-          default: main
-        runtime:
+          description: Human-readable reason, safe to show to whoever is driving the agent.
+    Liveness:
+      type: object
+      required:
+      - reachable
+      - serving
+      properties:
+        reachable:
+          type:
+          - boolean
+          - 'null'
+          description: The cluster says the pod exists and is ready. Null when there is no address yet.
+        serving:
+          type:
+          - boolean
+          - 'null'
+          description: An HTTP request to the pod's address returned something below 5xx. Null when the connection itself failed.
+    A2aPeerPublic:
+      type: object
+      description: Another A2A agent this one may call by name. The peer's bearer token is write-only and never serialized back.
+      required:
+      - name
+      - url
+      properties:
+        name:
           type: string
-          nullable: true
-          enum:
-          - node
-          - python
-          - go
-          - static
-          - docker
-          - null
-          description: Omit and the pod detects it from the repository.
-        buildCommand:
+        url:
           type: string
-          nullable: true
-          example: npm ci && npm run build
-        outputDir:
+          format: uri
+    BackupEntry:
+      type: object
+      required:
+      - name
+      - size
+      - createdAt
+      properties:
+        name:
           type: string
-          nullable: true
-          example: dist
-          description: Static output, relative to rootDir; null means no static half.
-        startCommand:
-          type: string
-          nullable: true
-          example: node server.js
-          description: Backend process; null means a static-only app.
-        appPort:
+        size:
           type: integer
-          default: 3000
-          description: Port the backend listens on inside the pod.
-        apiPrefix:
+        createdAt:
           type: string
-          default: /api
-          description: Paths routed to the backend; everything else is served from outputDir.
-        env:
-          type: object
-          additionalProperties:
-            type: string
-          description: Environment variables for the app. Not for secrets.
-        rootDir:
+          format: date-time
+    BuildStatus:
+      type: object
+      required:
+      - state
+      properties:
+        state:
+          type: string
+          enum:
+          - building
+          - ok
+          - failed
+          - unknown
+        commit:
           type: string
           nullable: true
-          example: app
-          description: Directory inside the repository where the build runs. For a monorepo whose app is not at the root. Netlify calls this "base".
-        repoUser:
+        startedAt:
+          type: string
+          format: date-time
+          nullable: true
+        finishedAt:
+          type: string
+          format: date-time
+          nullable: true
+        logTail:
           type: string
           nullable: true
-          description: 'Username paired with repoToken when the host wants one. Left out, we use what the host expects: x-access-token for GitHub, oauth2 for GitLab, the token alone for Gitea and Forgejo.'
+          description: Last lines of the build log.
+    WebhookDelivery:
+      type: object
+      required:
+      - ok
+      - status
+      - attempts
+      properties:
+        ok:
+          type: boolean
+        status:
+          type: integer
+          nullable: true
+          description: HTTP status of the last attempt, or null when the receiver was unreachable.
+        attempts:
+          type: integer
+        error:
+          type: string
     AgentQuota:
       type: object
       description: Latest RAM/disk snapshot for a pod, refreshed about once a minute from the cluster.
@@ -2095,51 +2140,6 @@ components:
         updatedAt:
           type: string
           format: date-time
-    Liveness:
-      type: object
-      required:
-      - reachable
-      - serving
-      properties:
-        reachable:
-          type:
-          - boolean
-          - 'null'
-          description: The cluster says the pod exists and is ready. Null when there is no address yet.
-        serving:
-          type:
-          - boolean
-          - 'null'
-          description: An HTTP request to the pod's address returned something below 5xx. Null when the connection itself failed.
-    AgentMemory:
-      type: object
-      description: Read-only view of a Hermes agent's persona data.
-      required:
-      - soul
-      - skills
-      - memories
-      - sessionsCount
-      properties:
-        soul:
-          type: string
-        skills:
-          type: array
-          items:
-            type: string
-        memories:
-          type: array
-          items:
-            type: object
-            required:
-            - name
-            - content
-            properties:
-              name:
-                type: string
-              content:
-                type: string
-        sessionsCount:
-          type: integer
   securitySchemes:
     bearerAuth:
       type: http

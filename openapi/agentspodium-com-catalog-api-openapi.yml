@@ -242,6 +242,53 @@ paths:
       x-operation-id-source: derived
 components:
   schemas:
+    DemoLine:
+      type: object
+      required:
+      - role
+      - text
+      properties:
+        role:
+          type: string
+          enum:
+          - user
+          - agent
+        text:
+          type: string
+    EngineCapabilities:
+      type: object
+      required:
+      - skills
+      - mcp
+      - skillRegistry
+      - skillUninstall
+      - llmKey
+      - model
+      - sso
+      - dashCredentials
+      properties:
+        skills:
+          type: boolean
+        mcp:
+          type: boolean
+        skillRegistry:
+          type: boolean
+          description: Whether the engine can search a skill registry itself.
+        skillUninstall:
+          type: boolean
+        llmKey:
+          type: boolean
+        model:
+          type: boolean
+        llmProviders:
+          type: array
+          items:
+            type: string
+          description: Providers this engine accepts; omitted means every provider AgentsPodium offers.
+        sso:
+          type: boolean
+        dashCredentials:
+          type: boolean
     ModelInfo:
       type: object
       required:
@@ -278,6 +325,60 @@ components:
           - cheap
           - mid
           - premium
+    LlmProviderInfo:
+      type: object
+      required:
+      - id
+      - label
+      - envVar
+      properties:
+        id:
+          type: string
+          enum:
+          - openai
+          - anthropic
+          - openrouter
+          - google
+          - gemini
+          - groq
+          - mistral
+          - deepseek
+          - xai
+          - nous
+        label:
+          type: string
+        envVar:
+          type: string
+    ToolsetInfo:
+      type: object
+      required:
+      - id
+      - name
+      - description
+      - defaultEnabled
+      - group
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        defaultEnabled:
+          type: boolean
+        group:
+          type: string
+          enum:
+          - web
+          - files
+          - media
+          - voice
+          - thinking
+          - integrations
+          - network
+        plugin:
+          type: string
+          description: Set for entries that are Hermes plugins rather than built-in toolsets.
     Tier:
       type: object
       required:
@@ -304,6 +405,46 @@ components:
         annualUsd:
           type: number
           description: Annual price; two months free versus paying monthly.
+    Engine:
+      type: object
+      required:
+      - id
+      - label
+      - description
+      - requiresDomain
+      - minTier
+      - status
+      - capabilities
+      properties:
+        id:
+          type: string
+          enum:
+          - hermes
+          - openclaw
+          - n8n
+          - claude-code
+          - opencode
+          - pi
+        label:
+          type: string
+        description:
+          type: string
+        requiresDomain:
+          type: boolean
+        minTier:
+          type: string
+          enum:
+          - tiny
+          - small
+          - medium
+          - large
+        status:
+          type: string
+          enum:
+          - stable
+          - beta
+        capabilities:
+          $ref: '#/components/schemas/EngineCapabilities'
     Persona:
       type: object
       description: 'Public catalog entry: a built-in persona, or a community persona once published.'
@@ -425,123 +566,6 @@ components:
           type: array
           items:
             type: string
-    Engine:
-      type: object
-      required:
-      - id
-      - label
-      - description
-      - requiresDomain
-      - minTier
-      - status
-      - capabilities
-      properties:
-        id:
-          type: string
-          enum:
-          - hermes
-          - openclaw
-          - n8n
-          - claude-code
-          - opencode
-          - pi
-        label:
-          type: string
-        description:
-          type: string
-        requiresDomain:
-          type: boolean
-        minTier:
-          type: string
-          enum:
-          - tiny
-          - small
-          - medium
-          - large
-        status:
-          type: string
-          enum:
-          - stable
-          - beta
-        capabilities:
-          $ref: '#/components/schemas/EngineCapabilities'
-    ToolsetInfo:
-      type: object
-      required:
-      - id
-      - name
-      - description
-      - defaultEnabled
-      - group
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        description:
-          type: string
-        defaultEnabled:
-          type: boolean
-        group:
-          type: string
-          enum:
-          - web
-          - files
-          - media
-          - voice
-          - thinking
-          - integrations
-          - network
-        plugin:
-          type: string
-          description: Set for entries that are Hermes plugins rather than built-in toolsets.
-    DemoLine:
-      type: object
-      required:
-      - role
-      - text
-      properties:
-        role:
-          type: string
-          enum:
-          - user
-          - agent
-        text:
-          type: string
-    EngineCapabilities:
-      type: object
-      required:
-      - skills
-      - mcp
-      - skillRegistry
-      - skillUninstall
-      - llmKey
-      - model
-      - sso
-      - dashCredentials
-      properties:
-        skills:
-          type: boolean
-        mcp:
-          type: boolean
-        skillRegistry:
-          type: boolean
-          description: Whether the engine can search a skill registry itself.
-        skillUninstall:
-          type: boolean
-        llmKey:
-          type: boolean
-        model:
-          type: boolean
-        llmProviders:
-          type: array
-          items:
-            type: string
-          description: Providers this engine accepts; omitted means every provider AgentsPodium offers.
-        sso:
-          type: boolean
-        dashCredentials:
-          type: boolean
     PersonaL10n:
       type: object
       required:
@@ -572,30 +596,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DemoLine'
-    LlmProviderInfo:
-      type: object
-      required:
-      - id
-      - label
-      - envVar
-      properties:
-        id:
-          type: string
-          enum:
-          - openai
-          - anthropic
-          - openrouter
-          - google
-          - gemini
-          - groq
-          - mistral
-          - deepseek
-          - xai
-          - nous
-        label:
-          type: string
-        envVar:
-          type: string
   securitySchemes:
     bearerAuth:
       type: http

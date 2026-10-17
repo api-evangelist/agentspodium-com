@@ -415,15 +415,18 @@ paths:
       x-operation-id-source: derived
 components:
   schemas:
-    StarsOrder:
+    CryptoOrder:
       type: object
       required:
       - id
       - userId
       - agentId
-      - amountStars
+      - asset
+      - amount
+      - baseline
       - status
       - createdAt
+      - txHash
       - paidAt
       - tier
       - priceUsd
@@ -431,13 +434,22 @@ components:
       properties:
         id:
           type: string
-          example: stx_…
+          example: cry_…
         userId:
           type: string
         agentId:
           type: string
-        amountStars:
-          type: integer
+        asset:
+          type: string
+          enum:
+          - usdt
+          - usdc
+        amount:
+          type: string
+          description: Amount owed, in the token's smallest unit (string to avoid float loss).
+        baseline:
+          type: string
+          description: The deposit address's balance at order creation; payment is (balance - baseline) >= amount.
         status:
           type: string
           enum:
@@ -447,6 +459,10 @@ components:
         createdAt:
           type: string
           format: date-time
+        txHash:
+          type:
+          - string
+          - 'null'
         paidAt:
           type:
           - string
@@ -469,46 +485,33 @@ components:
           anyOf:
           - type: object
           - type: 'null'
-    CryptoInfo:
+    PaymentProvider:
       type: object
       required:
-      - enabled
-      - chainId
-      - assets
+      - id
+      - label
       properties:
-        enabled:
-          type: boolean
-        chainId:
-          type: integer
-          example: 1
-        assets:
-          type: array
-          items:
-            type: object
-            required:
-            - asset
-            - symbol
-            properties:
-              asset:
-                type: string
-                enum:
-                - usdt
-                - usdc
-              symbol:
-                type: string
-    ApiError:
-      type: object
-      description: Uniform error body sent by the global error handler for every 4xx/5xx response.
-      required:
-      - error
-      - message
-      properties:
-        error:
+        id:
           type: string
-          description: Stable machine code, e.g. BAD_REQUEST, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, CONFLICT, RATE_LIMITED, INVALID_CODE, INTERNAL.
-        message:
+          example: gumroad
+        label:
           type: string
-          description: Human-readable reason, safe to show to whoever is driving the agent.
+        buyUrl:
+          type: string
+          format: uri
+        buyUrls:
+          type: object
+          additionalProperties:
+            type: string
+            format: uri
+          description: Per-tier purchase page, keyed by tier id.
+        note:
+          type: string
+        status:
+          type: string
+          enum:
+          - active
+          - soon
     Subscription:
       type: object
       description: A paid term for one agent. Returned verbatim by GET /subscriptions, including the raw license key used to activate it.
@@ -610,6 +613,19 @@ components:
           - 'null'
           format: date-time
           description: When payment stopped verifying; the grace period is counted from here, not from signup.
+    ApiError:
+      type: object
+      description: Uniform error body sent by the global error handler for every 4xx/5xx response.
+      required:
+      - error
+      - message
+      properties:
+        error:
+          type: string
+          description: Stable machine code, e.g. BAD_REQUEST, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, CONFLICT, RATE_LIMITED, INVALID_CODE, INTERNAL.
+        message:
+          type: string
+          description: Human-readable reason, safe to show to whoever is driving the agent.
     StarsInfo:
       type: object
       required:
@@ -624,18 +640,15 @@ components:
         starUsd:
           type: number
           description: USD value of one Telegram Star, used to price orders.
-    CryptoOrder:
+    StarsOrder:
       type: object
       required:
       - id
       - userId
       - agentId
-      - asset
-      - amount
-      - baseline
+      - amountStars
       - status
       - createdAt
-      - txHash
       - paidAt
       - tier
       - priceUsd
@@ -643,22 +656,13 @@ components:
       properties:
         id:
           type: string
-          example: cry_…
+          example: stx_…
         userId:
           type: string
         agentId:
           type: string
-        asset:
-          type: string
-          enum:
-          - usdt
-          - usdc
-        amount:
-          type: string
-          description: Amount owed, in the token's smallest unit (string to avoid float loss).
-        baseline:
-          type: string
-          description: The deposit address's balance at order creation; payment is (balance - baseline) >= amount.
+        amountStars:
+          type: integer
         status:
           type: string
           enum:
@@ -668,10 +672,6 @@ components:
         createdAt:
           type: string
           format: date-time
-        txHash:
-          type:
-          - string
-          - 'null'
         paidAt:
           type:
           - string
@@ -694,33 +694,33 @@ components:
           anyOf:
           - type: object
           - type: 'null'
-    PaymentProvider:
+    CryptoInfo:
       type: object
       required:
-      - id
-      - label
+      - enabled
+      - chainId
+      - assets
       properties:
-        id:
-          type: string
-          example: gumroad
-        label:
-          type: string
-        buyUrl:
-          type: string
-          format: uri
-        buyUrls:
-          type: object
-          additionalProperties:
-            type: string
-            format: uri
-          description: Per-tier purchase page, keyed by tier id.
-        note:
-          type: string
-        status:
-          type: string
-          enum:
-          - active
-          - soon
+        enabled:
+          type: boolean
+        chainId:
+          type: integer
+          example: 1
+        assets:
+          type: array
+          items:
+            type: object
+            required:
+            - asset
+            - symbol
+            properties:
+              asset:
+                type: string
+                enum:
+                - usdt
+                - usdc
+              symbol:
+                type: string
   securitySchemes:
     bearerAuth:
       type: http

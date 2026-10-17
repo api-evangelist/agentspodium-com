@@ -131,19 +131,6 @@ paths:
       x-operation-id-source: derived
 components:
   schemas:
-    ApiError:
-      type: object
-      description: Uniform error body sent by the global error handler for every 4xx/5xx response.
-      required:
-      - error
-      - message
-      properties:
-        error:
-          type: string
-          description: Stable machine code, e.g. BAD_REQUEST, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, CONFLICT, RATE_LIMITED, INVALID_CODE, INTERNAL.
-        message:
-          type: string
-          description: Human-readable reason, safe to show to whoever is driving the agent.
     ApiKey:
       type: object
       description: A machine credential. The secret itself (ak_live_…) is shown once, at creation, and never again.
@@ -177,6 +164,19 @@ components:
           - string
           - 'null'
           format: date-time
+    ApiError:
+      type: object
+      description: Uniform error body sent by the global error handler for every 4xx/5xx response.
+      required:
+      - error
+      - message
+      properties:
+        error:
+          type: string
+          description: Stable machine code, e.g. BAD_REQUEST, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, CONFLICT, RATE_LIMITED, INVALID_CODE, INTERNAL.
+        message:
+          type: string
+          description: Human-readable reason, safe to show to whoever is driving the agent.
   securitySchemes:
     bearerAuth:
       type: http
