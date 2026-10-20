@@ -289,3 +289,32 @@ x-evidence:
     note: text/markdown gateway description naming the 13 tools
 descriptions_source: live tools/list (authorship probe or saved capture); filled by backfill-tools-from-authorship.py
   --descriptions, 2026-09-28
+tool_quality:
+  tool_count: 13
+  tokens_total: 5330
+  tokens_per_tool_median: 402
+  heavy_tools: []
+  heavy_tool_count: 0
+  params_total: 25
+  params_undescribed: 0
+  params_described_pct: 100.0
+  tools_with_undescribed_params: 0
+  tools_annotated: 7
+  annotated_pct: 53.8
+  state_changing_unhinted:
+  - create_instance
+  - set_llm_key
+  - set_peers
+  - set_webhook
+  tools_missing_schema: 0
+  short_descriptions: 0
+  duplicate_descriptions: 0
+  duplicate_names: 0
+  nonportable_names: []
+  output_schema_count: 13
+  token_estimate: chars/3.6 of each compact tool definition
+  source: mcp/agentspodium-com-tools-list.json
+  measured: '2026-10-20'
+  scored: false
+  note: Facts from the saved tools/list capture (mcp_tool_quality.py); recorded, not scored. Checks learned
+    from Glimind's agent-readiness audit.
