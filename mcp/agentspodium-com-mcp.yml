@@ -68,10 +68,10 @@ tools_list_file: mcp/agentspodium-com-tools-list.json
 tool_count: 13
 tools:
 - name: list_platforms
-  title: List platforms and plans
-  category: catalog
   description: List available AgentsPodium engines (platforms) and hosting plans (tiers), with prices
     and capabilities.
+  title: List platforms and plans
+  category: catalog
   inputs: []
   required: []
   annotations:
@@ -80,9 +80,10 @@ tools:
   auth: none
   source_operation: openapi/agentspodium-com-openapi.yml#GET /engines + GET /tiers
 - name: list_instances
+  description: 'List the caller''s AgentsPodium instances (agents): id, name, engine, tier, status, endpoint
+    and A2A URL, domain, creation date. Never returns secrets.'
   title: List instances
   category: instances
-  description: List the caller's AgentsPodium instances (agents); never returns secrets.
   inputs: []
   required: []
   annotations:
@@ -90,10 +91,11 @@ tools:
     openWorldHint: true
   source_operation: openapi/agentspodium-com-openapi.yml#GET /agents
 - name: create_instance
+  description: Create (deploy) a new AgentsPodium instance. Returns the instance id and, when enableA2A
+    is true, the a2aUrl and a2aToken the caller should keep. After creating, poll get_instance_health
+    until it is serving, then call set_llm_key to give it a working LLM key.
   title: Create instance
   category: instances
-  description: Deploy a new pod; tier required; engine, personaId, name, channels, model, enableA2A, domain,
-    extraSoul, webhookUrl optional. Returns id, addresses and the A2A token.
   inputs:
   - personaId
   - engine
@@ -111,9 +113,9 @@ tools:
     openWorldHint: true
   source_operation: openapi/agentspodium-com-openapi.yml#POST /agents
 - name: get_instance_health
+  description: Check whether an instance is reachable and serving, plus its status and quota state.
   title: Check instance health
   category: health
-  description: Liveness (reachable, serving), status, quota.
   inputs:
   - id
   required:
@@ -123,9 +125,9 @@ tools:
     openWorldHint: true
   source_operation: openapi/agentspodium-com-openapi.yml#GET /agents/{id}/liveness + GET /agents/{id}
 - name: get_instance_term
+  description: Get the billing term (trial/paid/grace) for an instance, including when it renews or expires.
   title: Get billing term
   category: billing
-  description: Trial / grace / paid, stop and delete dates, paid till.
   inputs:
   - id
   required:
@@ -135,9 +137,10 @@ tools:
     openWorldHint: true
   source_operation: openapi/agentspodium-com-openapi.yml#GET /agents/{id}/term
 - name: set_llm_key
+  description: Set (or clear, with key=null) the LLM provider API key an instance uses to answer. Required
+    before a freshly created instance can actually respond.
   title: Set LLM key
   category: instances
-  description: Install the customer's model key (provider, key, model); rebuilds the pod.
   inputs:
   - id
   - provider
@@ -152,6 +155,7 @@ tools:
     openWorldHint: true
   source_operation: openapi/agentspodium-com-openapi.yml#PATCH /agents/{id}/llm-key
 - name: pause_instance
+  description: 'Pause an instance: stops it and its billing lease. Data is archived, not deleted.'
   title: Pause instance
   category: lifecycle
   inputs:
@@ -162,8 +166,8 @@ tools:
     idempotentHint: true
     openWorldHint: true
   source_operation: openapi/agentspodium-com-openapi.yml#POST /agents/{id}/pause
-  description: 'Pause an instance: stops it and its billing lease. Data is archived, not deleted.'
 - name: resume_instance
+  description: Resume a previously paused instance, rebuilding it from its archive.
   title: Resume instance
   category: lifecycle
   inputs:
@@ -174,11 +178,10 @@ tools:
     idempotentHint: true
     openWorldHint: true
   source_operation: openapi/agentspodium-com-openapi.yml#POST /agents/{id}/resume
-  description: Resume a previously paused instance, rebuilding it from its archive.
 - name: rebuild_instance
+  description: Rebuild an instance's pod (e.g. after a config change that needs a restart).
   title: Rebuild instance
   category: lifecycle
-  description: Fresh pod from the last backup.
   inputs:
   - id
   required:
@@ -188,9 +191,9 @@ tools:
     openWorldHint: true
   source_operation: openapi/agentspodium-com-openapi.yml#POST /agents/{id}/rebuild
 - name: delete_instance
+  description: Permanently delete an instance. This cannot be undone.
   title: Delete instance
   category: lifecycle
-  description: Destroys the pod after a final backup.
   inputs:
   - id
   required:
@@ -200,9 +203,10 @@ tools:
     openWorldHint: true
   source_operation: openapi/agentspodium-com-openapi.yml#DELETE /agents/{id}
 - name: get_payment_options
+  description: 'Get ways to pay for an instance''s plan: card/subscription buy links, crypto payment info,
+    and Telegram Stars info (crypto and Stars are in beta testing), plus the instance''s current term.'
   title: Get payment options
   category: billing
-  description: Buy links per plan, crypto and Telegram Stars info (beta), and the term.
   inputs:
   - id
   required:
@@ -213,9 +217,9 @@ tools:
   source_operation: openapi/agentspodium-com-openapi.yml#GET /subscriptions/providers + GET /crypto/info
     + GET /stars/info + GET /agents/{id}/term
 - name: set_peers
+  description: Set the list of other A2A agents this instance is allowed to call by name.
   title: Set A2A peers
   category: a2a
-  description: Agents this pod may call.
   inputs:
   - id
   - peers
@@ -227,9 +231,11 @@ tools:
     openWorldHint: true
   source_operation: openapi/agentspodium-com-openapi.yml#PUT /agents/{id}/peers
 - name: set_webhook
+  description: Register a URL that receives signed POSTs when the instance comes up, stops, fails, is
+    deleted, when a payment is confirmed and before deletion for non-payment — instead of polling get_instance_health.
+    Returns the HMAC secret once.
   title: Set event webhook
   category: webhooks
-  description: URL for signed pod events instead of polling.
   inputs:
   - id
   - url
@@ -318,3 +324,4 @@ tool_quality:
   scored: false
   note: Facts from the saved tools/list capture (mcp_tool_quality.py); recorded, not scored. Checks learned
     from Glimind's agent-readiness audit.
+tools_count: 13
