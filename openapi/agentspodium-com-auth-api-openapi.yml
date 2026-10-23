@@ -170,3 +170,9 @@ components:
       type: http
       scheme: bearer
       description: An API key `ak_live_…` created on the account page, or a session token from /auth/verify.
+x-provenance:
+  method: harvested
+  publisher: AgentsPodium
+  source: https://hosting.defispace.com/openapi.json
+  note: split by refine-openapis from the provider's own published document, verified by fetch (openapi/_original/*.fetch.json);
+    stamped by stamp-openapi-provenance.py (roadmap#793)

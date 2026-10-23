@@ -21,6 +21,9 @@ artifacts:
   authentication/agentspodium-com-authentication.yml:
     method: searched
     evidence: declared in the artifact
+  capabilities/agentspodium-com-capability-edges.yml:
+    method: unknown
+    evidence: no authorship recorded
   conformance/agentspodium-com-conformance.yml:
     method: searched
     evidence: declared in the artifact
@@ -36,7 +39,13 @@ artifacts:
   front-door-ai/2026-09-17.yml:
     method: unknown
     evidence: no authorship recorded
-  kin/checks-2026-09-24T161608.yml:
+  integrations/_index.yml:
+    method: generated
+    evidence: carries an API Evangelist house phrase
+  integrations/agentspodium-com-integration-edges.yml:
+    method: searched
+    evidence: declared in the artifact
+  kin/checks-2026-10-11T110117.yml:
     method: generated
     evidence: Kin Score snapshot written by score.rb
   kin/score-2026-09-19T193153.yml:
@@ -69,6 +78,21 @@ artifacts:
   kin/score-2026-09-24T161608.yml:
     method: generated
     evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-09-25T210408.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-09-25T232841.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-10-03T000835.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-10-03T024842.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-10-11T110117.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
   lifecycle/agentspodium-com-lifecycle.yml:
     method: searched
     evidence: declared in the artifact
@@ -89,14 +113,36 @@ artifacts:
     evidence: no authorship recorded
   openapi/_original/agentspodium-com-openapi.json:
     method: harvested
-    evidence: found in openapi/_original/; the fetch URL and bytes were not recorded, so byte-identity
-      to the provider's source is unverified
-  openapi/agentspodium-com-openapi.yml:
+    evidence: byte-identical to https://hosting.defispace.com/openapi.json (sha256 46b0fc821822, fetched
+      2026-10-04)
+  openapi/_original/agentspodium-com-openapi.yml:
+    method: harvested
+    evidence: the same operations as https://hosting.defispace.com/openapi.json (sha256 46b0fc821822,
+      fetched 2026-10-04)
+  openapi/agentspodium-com-a2a-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agentspodium-com-agents-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agentspodium-com-api-keys-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agentspodium-com-auth-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agentspodium-com-catalog-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agentspodium-com-payment-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agentspodium-com-status-api-openapi.yml:
     method: derived
     evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
   overlays/agentspodium-com-openapi-overlay.yaml:
-    method: generated
-    evidence: declared in the artifact
+    method: derived
+    evidence: an API Evangelist overlay (title) over the provider's contract
   packages/agentspodium-com-packages.yml:
     method: searched
     evidence: declared in the artifact
