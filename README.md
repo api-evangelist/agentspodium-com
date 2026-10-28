@@ -64,5 +64,137 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-AgentsPodium runs personal AI agents around the clock, each on its own pod, and hosts open-source agent platforms (Hermes, OpenClaw, n8n, Claude Code, OpenCode, Pi) on per-pod plans. The same service is driven by agents through an HTTP account API (OpenAPI 3.1, 52 operations), a hosted MCP server (13 tools), an A2A agent (5 skills), published Agent Skills and signed webhooks. Developer docs live at https://hosting.defispace.com (DefiSpace Hosting, the same operator, Radiance Team). Surfaced via the a2a-registry harvest and profiled 2026-09-19.
-- https://agentspodium.com/
+AgentsPodium runs personal AI agents around the clock, each on its own pod with its own memory and files, answering in the owner's messenger. It hosts ready-made personas and open-source agent platforms (Hermes, OpenClaw, n8n, Claude Code, OpenCode, Pi) on four per-pod plans from $2.49 a month with a 7-day free trial; the model key is the customer's own. The same service is driven by agents through an HTTP account API (OpenAPI 3.1, 52 operations, bearer API key), a hosted MCP server with 13 tools, an A2A agent with five skills, four published Agent Skills, and signed webhooks. The developer documentation lives on the operator's second brand, DefiSpace Hosting (hosting.defispace.com); the company behind both is Radiance Team.
+
+**Areas:** AI Agents · Agent Hosting · MCP · A2A · Agent-Native · Hosting · Webhook · Personal Assistants · Company
+
+## AgentsPodium on APIs.io
+
+Everything profiled for AgentsPodium is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/agentspodium-com/](https://apis.io/providers/agentspodium-com/)** — or go straight to one of the APIs or properties below.
+
+### APIs (9)
+
+- [AgentsPodium Hosting MCP Server](https://apis.io/apis/agentspodium-com/mcp-server/) — Hosted, agent-native MCP server (Streamable HTTP, protocol 2025-06-18, server agentspodium-hosting 1.0.4) exposing hosting as 13 tools — list_platforms,…
+- [AgentsPodium Hosting A2A Agent](https://apis.io/apis/agentspodium-com/a2a-agent/) — The hosting service as an A2A agent (protocol 0.3.0, JSON-RPC message/send at https://a2a.agentspodium.com/hosting/) with five skills — create-instance,…
+- [AgentsPodium A2A API](https://apis.io/apis/agentspodium-com/agentspodium-com-a2a-api/) — The public agent-to-agent directory.
+- [AgentsPodium Agents API](https://apis.io/apis/agentspodium-com/agentspodium-com-agents-api/) — Create, configure, and operate a pod.
+- [AgentsPodium API keys API](https://apis.io/apis/agentspodium-com/agentspodium-com-api-keys-api/) — Machine credentials for agents.
+- [AgentsPodium Auth API](https://apis.io/apis/agentspodium-com/agentspodium-com-auth-api/) — Sign in.
+- [AgentsPodium Catalog API](https://apis.io/apis/agentspodium-com/agentspodium-com-catalog-api/) — Read-only reference data: personas, tiers, engines, tools, models, providers.
+- [AgentsPodium Payment API](https://apis.io/apis/agentspodium-com/agentspodium-com-payment-api/) — Subscriptions and payment providers.
+- [AgentsPodium Status API](https://apis.io/apis/agentspodium-com/agentspodium-com-status-api/) — Platform health.
+
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### AsyncAPI (1)
+
+Event-driven and webhook contracts.
+
+- [Agentspodium Com Webhooks](https://apis.io/asyncapis/agentspodium-com/agentspodium-com-webhooks/)
+
+#### MCP servers (1)
+
+Model Context Protocol servers that expose the API to agents.
+
+- [AgentsPodium Hosting](https://apis.io/servers/agentspodium-com/agentspodium-hosting/)
+
+#### Agentic access (1)
+
+Which operations an agent can call, which act, and which need a human in the loop.
+
+- [Agentspodium Com Agentic Access](https://apis.io/agentic-access/agentspodium-com/agentspodium-com-agentic-access/)
+
+#### Overlays (1)
+
+OpenAPI overlays, including conversational phrasing for each operation.
+
+- [Agentspodium Com Openapi Overlay](https://apis.io/overlays/agentspodium-com/agentspodium-com-openapi-overlay/)
+
+#### Security (2)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Agentspodium Com Authentication](https://apis.io/security/agentspodium-com/agentspodium-com-authentication/)
+- [Agentspodium Com Domain Security](https://apis.io/security/agentspodium-com/agentspodium-com-domain-security/)
+
+#### Plans and pricing (1)
+
+Published plans, tiers and prices.
+
+- [Agentspodium Com Plans Pricing](https://apis.io/plans/agentspodium-com/agentspodium-com-plans-pricing/)
+
+#### Rate limits (1)
+
+Published request limits.
+
+- [Agentspodium Com Rate Limits](https://apis.io/rate-limits/agentspodium-com/agentspodium-com-rate-limits/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](https://agentspodium.com/)
+- [Documentation](https://hosting.defispace.com/docs/)
+- [Getting started](https://hosting.defispace.com/docs/quickstart.html)
+- [API reference](https://hosting.defispace.com/openapi.json)
+- [Pricing](https://hosting.defispace.com/#pricing)
+- [Blog](https://agentspodium.com/articles)
+- [GitHub](https://github.com/agentspodium)
+- [Status](https://agentspodium.com/api/status)
+
+## API Evangelist rating
+
+**Kin Score 54.1** — developing · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 75.0 |
+| Contract quality | 56.4 |
+| Contract governance | 18.2 |
+| Operational transparency | 55.3 |
+| Developer ergonomics | 59.5 |
+| Access clarity | 55.3 |
+
+**Agent readiness 53.0** — agent-ready (gated down from agent-native)
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | derived (partial credit) |
+| Reversibility Documented | — |
+| MCP Server | documented (partial credit) |
+| Auth Clarity | served (partial credit) |
+| Idempotency | — |
+| Error Semantics | verified |
+| OpenAPI Examples | partial |
+| Rate Limit Signal | documented (partial credit) |
+| Event Surface Described | yes |
+| Agent Skills | yes |
+| Well Known Catalog | yes |
+| Consent Identity | — |
+| Agent Card | conformant |
+| Dry Run Mode | — |
+| Delegated Identity | — |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+| Pagination Ratio | na |
+| Operation Distinctiveness | distinct |
+
+**Regulatory alignment 20.6** — Horizontal (data, software, accessibility, platform)
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/agentspodium-com/](https://apis.io/providers/agentspodium-com/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for AgentsPodium: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/agentspodium-com/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
